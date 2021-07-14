@@ -64,17 +64,22 @@ class _SignupWidgetState extends State<SignupWidget> {
       print(body);
 
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString('email', body['email']);
-      prefs.setString('idToken', body['idToken']);
+      var email = body['email'],
+          idToken = body['idToken'],
+          localId = body['localId'];
+      prefs.setString('email', email);
+      prefs.setString('idToken', idToken);
+      prefs.setString('localId', localId);
 
       var url2 = Uri.parse(
-          "https://petbottle-project-default-rtdb.firebaseio.com/usersdata.json");
+          "https://petbottle-project-default-rtdb.firebaseio.com/usersdata/$localId.json");
 
-      var result2 = await http.post(url2,
+      var result2 = await http.patch(url2,
+          headers: {"Content-Type": "application/json"},
           body: json.encode({
             "email": emailAddress,
             "password": password,
-            "idToken": body['idToken'],
+            "idToken": idToken,
             "firstName": firstName,
             "lastName": lastName,
             "permanentAddress": permanentAddress,
@@ -82,7 +87,7 @@ class _SignupWidgetState extends State<SignupWidget> {
           }));
 
       Map body2 = json.decode(result2.body);
-      prefs.setString('dataid', body2['name']);
+      prefs.setString('dataId', localId);
       print(body2);
 
       Navigator.of(ctx).push(MaterialPageRoute(builder: (_) {

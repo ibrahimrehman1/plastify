@@ -26,6 +26,7 @@ class LoginWidget extends StatelessWidget {
 
     prefs.setString('email', body['email']);
     prefs.setString('idToken', body['idToken']);
+    prefs.setString('dataId', body['localId']);
 
     Navigator.of(ctx).push(MaterialPageRoute(builder: (_) {
       return (DashboardWidget());

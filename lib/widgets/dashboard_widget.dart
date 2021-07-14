@@ -13,6 +13,10 @@ class DashboardWidget extends StatefulWidget {
 
 class _DashboardWidgetState extends State<DashboardWidget> {
   List<String> products = ["400 points", "250 points", "1000 points"];
+  var firstName;
+  var lastName;
+  var email;
+  var mobileNo;
 
   List<String> productsSubtitles = ["KFC", "Macdonald", "Starbucks"];
 
@@ -21,16 +25,16 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   }
 
   Future handleData() async {
+    final SharedPreferences preference = await SharedPreferences.getInstance();
+    var dataId = preference.getString('dataId');
+    print("Data ID: " + dataId.toString());
+
     var url2 = Uri.parse(
-        "https://petbottle-project-default-rtdb.firebaseio.com/usersdata.json");
+        "https://petbottle-project-default-rtdb.firebaseio.com/usersdata/$dataId.json");
 
     var result2 = await http.get(url2);
-    final SharedPreferences preference = await SharedPreferences.getInstance();
-    var email = preference.getString('email');
-    print("Data ID: " + preference.getString('dataid').toString());
 
-    var body = await json
-        .decode(result2.body)[preference.getString('dataid').toString()];
+    var body = await json.decode(result2.body);
 
     // if (body['email'] != email) {
     //   var body = await json.decode(result2.body);
@@ -43,6 +47,105 @@ class _DashboardWidgetState extends State<DashboardWidget> {
       userData = body;
     });
     print(result2.body.length);
+  }
+
+  Future updateData() async {
+    final SharedPreferences preference = await SharedPreferences.getInstance();
+    var dataId = preference.getString('dataId');
+    print(dataId);
+    var url3 = Uri.parse(
+        "https://petbottle-project-default-rtdb.firebaseio.com/usersdata/$dataId.json");
+
+    var result3 = await http.patch(url3,
+        headers: {"Content-Type": "application/json"},
+        body: json.encode({
+          'email': userData['email'],
+          'firstName': userData['firstName'],
+          'lastName': userData['lastName'],
+          'mobileNo': userData['mobileNo']
+        }));
+    print(json.decode(result3.body));
+
+    if (userData['email'] != email) {}
+  }
+
+  void changeEmail() async {
+    final SharedPreferences preference = await SharedPreferences.getInstance();
+    var urlForEmail = Uri.parse(
+        "https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyD6FVCXVR7SqRD2rjavBUAantQxi8Qpz-4");
+    var result4 = await http.post(urlForEmail,
+        body: json.encode({
+          "idToken": preference.getString("idToken").toString(),
+          "email": email,
+          "returnSecureToken": false
+        }));
+
+    print(json.decode(result4.body));
+  }
+
+  Future<void> _showMyDialog(String msg) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Change $msg'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                TextFormField(
+                  decoration: InputDecoration(
+                    labelText: msg,
+                  ),
+                  keyboardType: msg == "Mobile No."
+                      ? TextInputType.number
+                      : TextInputType.text,
+                  maxLength: 50,
+                  onChanged: (v) {
+                    if (msg == "First Name") {
+                      firstName = v;
+                    } else if (msg == "Last Name") {
+                      lastName = v;
+                    } else if (msg == "Email Address") {
+                      email = v;
+                    } else if (msg == "Mobile No.") {
+                      mobileNo = v;
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Change'),
+              onPressed: () {
+                setState(() {
+                  if (msg == "First Name") {
+                    userData['firstName'] = firstName;
+                  } else if (msg == "Last Name") {
+                    userData['lastName'] = lastName;
+                  } else if (msg == "Email Address") {
+                    changeEmail();
+
+                    userData['email'] = email;
+                  } else if (msg == "Mobile No.") {
+                    userData['mobileNo'] = mobileNo;
+                  }
+                });
+                Navigator.of(context).pop();
+              },
+            )
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -111,14 +214,41 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                 userData != null
                     ? Column(
                         children: [
-                          Text("Email Address"),
+                          TextButton(
+                            child: Text("Email Address",
+                                style: TextStyle(fontWeight: FontWeight.bold)),
+                            onPressed: () => _showMyDialog('Email Address'),
+                          ),
                           Text(userData['email']),
-                          Text("First Name"),
+                          TextButton(
+                              child: Text("First Name",
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
+                              onPressed: () => _showMyDialog('First Name')),
                           Text(userData['firstName']),
-                          Text("Last Name"),
+                          TextButton(
+                              child: Text("Last Name",
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
+                              onPressed: () => _showMyDialog('Last Name')),
                           Text(userData['lastName']),
-                          Text("Mobile No."),
+                          TextButton(
+                              child: Text("Mobile No.",
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
+                              onPressed: () => _showMyDialog('Mobile No.')),
                           Text(userData['mobileNo']),
+                          Container(
+                              margin: EdgeInsets.only(top: 30.0),
+                              child: ElevatedButton(
+                                  child: Text("Save Data"),
+                                  onPressed: () => updateData(),
+                                  style: ButtonStyle(
+                                      backgroundColor:
+                                          MaterialStateProperty.all<Color>(
+                                              Colors.lightGreen.shade800),
+                                      fixedSize: MaterialStateProperty.all(
+                                          Size.fromWidth(320))))),
                           Container(
                               margin: EdgeInsets.only(top: 30.0),
                               child: ElevatedButton(
@@ -137,7 +267,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                           MaterialStateProperty.all<Color>(
                                               Colors.lightGreen.shade800),
                                       fixedSize: MaterialStateProperty.all(
-                                          Size.fromWidth(320)))))
+                                          Size.fromWidth(320))))),
                         ],
                       )
                     : Text(""),
