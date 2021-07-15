@@ -1,9 +1,12 @@
+import 'package:app/widgets/admin_dashboard_widget.dart';
 import "package:flutter/material.dart";
 import "package:flutter_icons/flutter_icons.dart";
 import "package:http/http.dart" as http;
 import "dart:convert";
 import "package:shared_preferences/shared_preferences.dart";
 import "./dashboard_widget.dart";
+import "./manager_dashboard_widget.dart";
+import "./admin_dashboard_widget.dart";
 
 class LoginWidget extends StatelessWidget {
   String emailAddress = "";
@@ -28,9 +31,19 @@ class LoginWidget extends StatelessWidget {
     prefs.setString('idToken', body['idToken']);
     prefs.setString('dataId', body['localId']);
 
-    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) {
-      return (DashboardWidget());
-    }));
+    if (body['email'].toString().contains("manager")) {
+      Navigator.of(ctx).push(MaterialPageRoute(builder: (_) {
+        return (ManagerDashboardWidget());
+      }));
+    } else if (body['email'].toString().contains("admin")) {
+      Navigator.of(ctx).push(MaterialPageRoute(builder: (_) {
+        return (AdminDashboardWidget());
+      }));
+    } else {
+      Navigator.of(ctx).push(MaterialPageRoute(builder: (_) {
+        return (DashboardWidget());
+      }));
+    }
   }
 
   @override

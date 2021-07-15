@@ -12,11 +12,23 @@ class DashboardWidget extends StatefulWidget {
 }
 
 class _DashboardWidgetState extends State<DashboardWidget> {
-  List<String> products = ["400 points", "250 points", "1000 points"];
   var firstName;
   var lastName;
   var email;
   var mobileNo;
+  var allDeals = [];
+
+  Future getAllDeals() async {
+    var dealUrl = Uri.parse(
+        "https://petbottle-project-default-rtdb.firebaseio.com/managerdeals/manager.json");
+
+    var allEmailsResult = await http.get(dealUrl);
+    var body = json.decode(allEmailsResult.body);
+    print("All Deals: " + body.toString());
+    setState(() {
+      allDeals = body['deals'];
+    });
+  }
 
   List<String> productsSubtitles = ["KFC", "Macdonald", "Starbucks"];
 
@@ -157,16 +169,27 @@ class _DashboardWidgetState extends State<DashboardWidget> {
       length: 3,
       child: Scaffold(
           appBar: AppBar(
-            backgroundColor: Color.fromRGBO(0, 200, 0, 1),
-            bottom: TabBar(
-              tabs: [
-                Tab(icon: Icon(Icons.home_filled)),
-                Tab(icon: Icon(Icons.book_outlined)),
-                Tab(icon: Icon(Icons.info_outline)),
-              ],
-            ),
-            title: Text('Dashboard'),
-          ),
+              backgroundColor: Color.fromRGBO(0, 200, 0, 1),
+              bottom: TabBar(
+                tabs: [
+                  Tab(icon: Icon(Icons.home_filled)),
+                  Tab(icon: Icon(Icons.book_outlined)),
+                  Tab(icon: Icon(Icons.info_outline)),
+                ],
+              ),
+              title: Text('Dashboard'),
+              actions: <Widget>[
+                Padding(
+                    padding: EdgeInsets.only(right: 20.0, top: 18.0),
+                    child: GestureDetector(
+                      onTap: () {},
+                      child: Text(
+                        "1200 Points",
+                        style: TextStyle(
+                            fontSize: 20.0, fontWeight: FontWeight.bold),
+                      ),
+                    ))
+              ]),
           body: Container(
             margin:
                 EdgeInsets.only(top: 15.0, left: 5.0, right: 5.0, bottom: 5.0),
@@ -174,36 +197,79 @@ class _DashboardWidgetState extends State<DashboardWidget> {
               children: [
                 Column(
                   children: [
-                    Text(
-                      "Your Balance",
-                      style: TextStyle(
-                          fontSize: 20.0, fontWeight: FontWeight.bold),
-                    ),
-                    Text("1260 points",
-                        style: TextStyle(
-                            fontSize: 30.0, fontWeight: FontWeight.bold))
+                    allDeals.length == 0
+                        ? Container(
+                            margin: EdgeInsets.only(top: 30.0),
+                            child: ElevatedButton(
+                                child: Text("Show available Deals"),
+                                onPressed: () {
+                                  getAllDeals()
+                                      .whenComplete(() => print("Fetched!!!"));
+                                },
+                                style: ButtonStyle(
+                                    backgroundColor:
+                                        MaterialStateProperty.all<Color>(
+                                            Colors.lightGreen.shade800),
+                                    fixedSize: MaterialStateProperty.all(
+                                        Size.fromWidth(320)))))
+                        : Expanded(
+                            child: SizedBox(
+                              height: 200.0,
+                              child: new ListView.builder(
+                                scrollDirection: Axis.vertical,
+                                itemCount: allDeals.length,
+                                itemBuilder: (BuildContext ctxt, int index) {
+                                  return new ListTile(
+                                    title: Text(
+                                      allDeals[index]['dealName'],
+                                      style: TextStyle(
+                                          fontSize: 15.0,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    subtitle:
+                                        Text(allDeals[index]['requiredPoints']),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
                   ],
                 ),
                 Column(
                   children: [
-                    Text("Previous Redeems",
-                        style: TextStyle(
-                            fontSize: 30.0, fontWeight: FontWeight.bold)),
+                    allDeals.length == 0
+                        ? Container(
+                            margin: EdgeInsets.only(top: 30.0),
+                            child: ElevatedButton(
+                                child: Text("Show previous Redeems"),
+                                onPressed: () {
+                                  getAllDeals()
+                                      .whenComplete(() => print("Fetched!!!"));
+                                },
+                                style: ButtonStyle(
+                                    backgroundColor:
+                                        MaterialStateProperty.all<Color>(
+                                            Colors.lightGreen.shade800),
+                                    fixedSize: MaterialStateProperty.all(
+                                        Size.fromWidth(320)))))
+                        : Text("Previous Redeems",
+                            style: TextStyle(
+                                fontSize: 30.0, fontWeight: FontWeight.bold)),
                     Expanded(
                       child: SizedBox(
                         height: 200.0,
                         child: new ListView.builder(
                           scrollDirection: Axis.vertical,
-                          itemCount: products.length,
+                          itemCount: allDeals.length,
                           itemBuilder: (BuildContext ctxt, int index) {
                             return new ListTile(
                               title: Text(
-                                products[index],
+                                allDeals[index]['dealName'],
                                 style: TextStyle(
                                     fontSize: 15.0,
                                     fontWeight: FontWeight.bold),
                               ),
-                              subtitle: Text(productsSubtitles[index]),
+                              subtitle: Text(allDeals[index]['requiredPoints']),
                             );
                           },
                         ),
