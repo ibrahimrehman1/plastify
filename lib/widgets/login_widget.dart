@@ -58,7 +58,8 @@ class LoginWidget extends StatelessWidget {
         body: Container(
             width: double.infinity,
             padding: EdgeInsets.all(16.0),
-            child: Column(
+            child: SingleChildScrollView(
+                child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -71,7 +72,7 @@ class LoginWidget extends StatelessWidget {
                 TextFormField(
                   decoration: InputDecoration(
                     labelText: "Email Address",
-                    prefixIcon: Icon(FlutterIcons.email_box_mco,
+                    prefixIcon: Icon(FlutterIcons.email_check_outline_mco,
                         color: Color.fromRGBO(0, 200, 0, 1)),
                   ),
                   keyboardType: TextInputType.emailAddress,
@@ -83,7 +84,7 @@ class LoginWidget extends StatelessWidget {
                 TextField(
                   decoration: InputDecoration(
                     labelText: "Password",
-                    prefixIcon: Icon(FlutterIcons.lock_alert_mco,
+                    prefixIcon: Icon(FlutterIcons.lock_outline_mdi,
                         color: Color.fromRGBO(0, 200, 0, 1)),
                   ),
                   obscureText: true,
@@ -103,6 +104,6 @@ class LoginWidget extends StatelessWidget {
                             fixedSize: MaterialStateProperty.all(
                                 Size.fromWidth(320)))))
               ],
-            )));
+            ))));
   }
 }

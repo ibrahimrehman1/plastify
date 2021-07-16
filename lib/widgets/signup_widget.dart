@@ -119,19 +119,19 @@ class _SignupWidgetState extends State<SignupWidget> {
               Container(margin: EdgeInsets.only(top: 20.0)),
               TextFormField(
                 decoration: InputDecoration(
-                    labelText: "First Name",
-                    prefixIcon: Icon(FlutterIcons.profile_ant,
-                        color: Color.fromRGBO(0, 200, 0, 1))),
+                  labelText: "First Name",
+                  prefixIcon: Icon(FlutterIcons.person_outline_mdi,
+                      color: Color.fromRGBO(0, 200, 0, 1)),
+                ),
                 onChanged: (v) {
                   firstName = v;
                 },
-                cursorColor: Color.fromRGBO(0, 200, 0, 1),
                 maxLength: 20,
               ),
               TextFormField(
                 decoration: InputDecoration(
                   labelText: "Last Name",
-                  prefixIcon: Icon(FlutterIcons.profile_ant,
+                  prefixIcon: Icon(FlutterIcons.person_outline_mdi,
                       color: Color.fromRGBO(0, 200, 0, 1)),
                 ),
                 onChanged: (v) {
@@ -142,7 +142,7 @@ class _SignupWidgetState extends State<SignupWidget> {
               TextFormField(
                 decoration: InputDecoration(
                   labelText: "Email Address",
-                  prefixIcon: Icon(FlutterIcons.email_box_mco,
+                  prefixIcon: Icon(FlutterIcons.email_check_outline_mco,
                       color: Color.fromRGBO(0, 200, 0, 1)),
                 ),
                 keyboardType: TextInputType.emailAddress,
@@ -154,7 +154,7 @@ class _SignupWidgetState extends State<SignupWidget> {
               TextFormField(
                 decoration: InputDecoration(
                     labelText: "Permanent Address",
-                    prefixIcon: Icon(FlutterIcons.address_book_faw,
+                    prefixIcon: Icon(FlutterIcons.address_book_o_faw,
                         color: Color.fromRGBO(0, 200, 0, 1))),
                 onChanged: (v) {
                   permanentAddress = v;
@@ -176,7 +176,7 @@ class _SignupWidgetState extends State<SignupWidget> {
               TextField(
                 decoration: InputDecoration(
                   labelText: "Password",
-                  prefixIcon: Icon(FlutterIcons.lock_alert_mco,
+                  prefixIcon: Icon(FlutterIcons.lock_outline_mdi,
                       color: Color.fromRGBO(0, 200, 0, 1)),
                 ),
                 obscureText: true,
@@ -188,7 +188,7 @@ class _SignupWidgetState extends State<SignupWidget> {
               TextField(
                 decoration: InputDecoration(
                   labelText: "Confirm Password",
-                  prefixIcon: Icon(FlutterIcons.lock_alert_mco,
+                  prefixIcon: Icon(FlutterIcons.lock_outline_mdi,
                       color: Color.fromRGBO(0, 200, 0, 1)),
                 ),
                 obscureText: true,
@@ -208,7 +208,7 @@ class _SignupWidgetState extends State<SignupWidget> {
                           fixedSize:
                               MaterialStateProperty.all(Size.fromWidth(320))))),
               Container(
-                  margin: EdgeInsets.only(top: 10.0, bottom: 20.0),
+                  padding: EdgeInsets.only(top: 10.0, bottom: 20.0),
                   child: Material(
                       child: InkWell(
                     child: Text(

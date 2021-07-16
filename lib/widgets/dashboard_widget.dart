@@ -219,16 +219,34 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                 scrollDirection: Axis.vertical,
                                 itemCount: allDeals.length,
                                 itemBuilder: (BuildContext ctxt, int index) {
-                                  return new ListTile(
-                                    title: Text(
-                                      allDeals[index]['dealName'],
-                                      style: TextStyle(
-                                          fontSize: 15.0,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    subtitle:
-                                        Text(allDeals[index]['requiredPoints']),
-                                  );
+                                  return new Container(
+                                      margin: EdgeInsets.all(5.0),
+                                      decoration: BoxDecoration(
+                                          border: Border.all(
+                                        color: Colors.black,
+                                        width: 1.0,
+                                      )), // decoration: BoxDecoration(boxShadow: [
+                                      //   BoxShadow(
+
+                                      //     color: Color.fromRGBO(50, 50, 50, .4),
+                                      //     offset: const Offset(
+                                      //       5.0,
+                                      //       5.0,
+                                      //     ),
+                                      //     blurRadius: 10.0,
+                                      //     spreadRadius: 2.0,
+                                      //   )
+                                      // ]),
+                                      child: ListTile(
+                                        title: Text(
+                                          allDeals[index]['dealName'],
+                                          style: TextStyle(
+                                              fontSize: 15.0,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        subtitle: Text(
+                                            allDeals[index]['requiredPoints']),
+                                      ));
                                 },
                               ),
                             ),
@@ -262,15 +280,23 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                           scrollDirection: Axis.vertical,
                           itemCount: allDeals.length,
                           itemBuilder: (BuildContext ctxt, int index) {
-                            return new ListTile(
-                              title: Text(
-                                allDeals[index]['dealName'],
-                                style: TextStyle(
-                                    fontSize: 15.0,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              subtitle: Text(allDeals[index]['requiredPoints']),
-                            );
+                            return new Container(
+                                margin: EdgeInsets.all(5.0),
+                                decoration: BoxDecoration(
+                                    border: Border.all(
+                                  color: Colors.black,
+                                  width: 1.0,
+                                )),
+                                child: ListTile(
+                                  title: Text(
+                                    allDeals[index]['dealName'],
+                                    style: TextStyle(
+                                        fontSize: 15.0,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  subtitle:
+                                      Text(allDeals[index]['requiredPoints']),
+                                ));
                           },
                         ),
                       ),
@@ -280,30 +306,46 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                 userData != null
                     ? Column(
                         children: [
-                          TextButton(
-                            child: Text("Email Address",
-                                style: TextStyle(fontWeight: FontWeight.bold)),
-                            onPressed: () => _showMyDialog('Email Address'),
-                          ),
-                          Text(userData['email']),
-                          TextButton(
-                              child: Text("First Name",
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.bold)),
-                              onPressed: () => _showMyDialog('First Name')),
-                          Text(userData['firstName']),
-                          TextButton(
-                              child: Text("Last Name",
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.bold)),
-                              onPressed: () => _showMyDialog('Last Name')),
-                          Text(userData['lastName']),
-                          TextButton(
-                              child: Text("Mobile No.",
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.bold)),
-                              onPressed: () => _showMyDialog('Mobile No.')),
-                          Text(userData['mobileNo']),
+                          Container(
+                              padding: EdgeInsets.all(10.0),
+                              decoration: BoxDecoration(
+                                  border: Border.all(
+                                color: Colors.black,
+                                width: 1.0,
+                              )),
+                              child: Column(
+                                children: [
+                                  TextButton(
+                                    child: Text("Email Address",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold)),
+                                    onPressed: () =>
+                                        _showMyDialog('Email Address'),
+                                  ),
+                                  Text(userData['email']),
+                                  TextButton(
+                                      child: Text("First Name",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold)),
+                                      onPressed: () =>
+                                          _showMyDialog('First Name')),
+                                  Text(userData['firstName']),
+                                  TextButton(
+                                      child: Text("Last Name",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold)),
+                                      onPressed: () =>
+                                          _showMyDialog('Last Name')),
+                                  Text(userData['lastName']),
+                                  TextButton(
+                                      child: Text("Mobile No.",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold)),
+                                      onPressed: () =>
+                                          _showMyDialog('Mobile No.')),
+                                  Text(userData['mobileNo']),
+                                ],
+                              )),
                           Container(
                               margin: EdgeInsets.only(top: 30.0),
                               child: ElevatedButton(
