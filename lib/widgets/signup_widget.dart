@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import 'package:flutter/services.dart';
 import "dart:core";
 import "package:flutter_icons/flutter_icons.dart";
 import "package:http/http.dart" as http;
@@ -110,6 +111,12 @@ class _SignupWidgetState extends State<SignupWidget> {
             padding: EdgeInsets.all(16.0),
             child: SingleChildScrollView(
                 child: Column(children: [
+              Image(
+                image: AssetImage('assets/images/ncai_logo.png'),
+                width: 150,
+                height: 150,
+              ),
+              Container(margin: EdgeInsets.only(top: 20.0)),
               TextFormField(
                 decoration: InputDecoration(
                     labelText: "First Name",

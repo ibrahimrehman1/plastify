@@ -62,6 +62,12 @@ class LoginWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                Image(
+                  image: AssetImage('assets/images/ncai_logo.png'),
+                  width: 150,
+                  height: 150,
+                ),
+                Container(margin: EdgeInsets.only(top: 20.0)),
                 TextFormField(
                   decoration: InputDecoration(
                     labelText: "Email Address",
