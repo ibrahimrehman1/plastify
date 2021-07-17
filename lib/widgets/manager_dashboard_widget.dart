@@ -79,20 +79,25 @@ class _ManagerDashboardWidgetState extends State<ManagerDashboardWidget> {
                 EdgeInsets.only(top: 15.0, left: 5.0, right: 5.0, bottom: 5.0),
             child: TabBarView(
               children: [
-                Column(
+                SingleChildScrollView(
+                    child: Column(
                   children: [
-                    Text("Add a Deal", style: TextStyle(fontSize: 20.0)),
-                    TextFormField(
-                      decoration: InputDecoration(
-                          labelText: "Deal Name",
-                          prefixIcon: Icon(FlutterIcons.shopping_bag_ent,
-                              color: Color.fromRGBO(0, 200, 0, 1))),
-                      onChanged: (v) {
-                        dealName = v;
-                      },
-                      cursorColor: Color.fromRGBO(0, 200, 0, 1),
-                      maxLength: 20,
-                    ),
+                    Text("Add a Deal",
+                        style: TextStyle(
+                            fontSize: 30.0, fontWeight: FontWeight.bold)),
+                    Container(
+                        margin: EdgeInsets.only(top: 20.0),
+                        child: TextFormField(
+                          decoration: InputDecoration(
+                              labelText: "Deal Name",
+                              prefixIcon: Icon(FlutterIcons.shopping_bag_ent,
+                                  color: Color.fromRGBO(0, 200, 0, 1))),
+                          onChanged: (v) {
+                            dealName = v;
+                          },
+                          cursorColor: Color.fromRGBO(0, 200, 0, 1),
+                          maxLength: 20,
+                        )),
                     TextFormField(
                       decoration: InputDecoration(
                           labelText: "Required Points",
@@ -116,7 +121,7 @@ class _ManagerDashboardWidgetState extends State<ManagerDashboardWidget> {
                                 fixedSize: MaterialStateProperty.all(
                                     Size.fromWidth(320)))))
                   ],
-                ),
+                )),
                 Column(
                   children: [
                     allDeals.length == 0
@@ -141,16 +146,24 @@ class _ManagerDashboardWidgetState extends State<ManagerDashboardWidget> {
                           scrollDirection: Axis.vertical,
                           itemCount: allDeals.length,
                           itemBuilder: (BuildContext ctxt, int index) {
-                            return new ListTile(
-                              title: Text(
-                                allDeals[index]['dealName'],
-                                style: TextStyle(
-                                    fontSize: 15.0,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              subtitle: Text(
-                                  allDeals[index]['requiredPoints'].toString()),
-                            );
+                            return new Container(
+                                margin: EdgeInsets.all(5.0),
+                                decoration: BoxDecoration(
+                                    border: Border.all(
+                                  color: Colors.black,
+                                  width: 1.0,
+                                )),
+                                child: ListTile(
+                                  title: Text(
+                                    allDeals[index]['dealName'],
+                                    style: TextStyle(
+                                        fontSize: 15.0,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  subtitle: Text(allDeals[index]
+                                          ['requiredPoints']
+                                      .toString()),
+                                ));
                           },
                         ),
                       ),
