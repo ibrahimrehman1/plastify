@@ -8,13 +8,24 @@ import "./dashboard_widget.dart";
 import "./manager_dashboard_widget.dart";
 import "./admin_dashboard_widget.dart";
 
-class LoginWidget extends StatelessWidget {
+class LoginWidget extends StatefulWidget {
+  @override
+  _LoginWidgetState createState() => _LoginWidgetState();
+}
+
+class _LoginWidgetState extends State<LoginWidget> {
   String emailAddress = "";
+
   String password = "";
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
 
   void loginUser(ctx) async {
     final url = Uri.parse(
         "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyD6FVCXVR7SqRD2rjavBUAantQxi8Qpz-4");
+
+    emailAddress = emailController.text;
+    password = passwordController.text;
     var result = await http.post(url,
         body: json.encode({
           "email": emailAddress,
@@ -70,6 +81,7 @@ class LoginWidget extends StatelessWidget {
                 ),
                 Container(margin: EdgeInsets.only(top: 20.0)),
                 TextFormField(
+                  controller: emailController,
                   decoration: InputDecoration(
                     labelText: "Email Address",
                     prefixIcon: Icon(FlutterIcons.email_check_outline_mco,
@@ -82,6 +94,7 @@ class LoginWidget extends StatelessWidget {
                   maxLength: 50,
                 ),
                 TextField(
+                  controller: passwordController,
                   decoration: InputDecoration(
                     labelText: "Password",
                     prefixIcon: Icon(FlutterIcons.lock_outline_mdi,

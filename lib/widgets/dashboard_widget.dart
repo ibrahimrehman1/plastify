@@ -1,6 +1,10 @@
+import 'dart:math';
+
 import "package:flutter/material.dart";
 import "./signup_widget.dart";
+import 'dart:io' as IO;
 import "dart:convert";
+import 'dart:typed_data';
 import "package:shared_preferences/shared_preferences.dart";
 import "package:http/http.dart" as http;
 
@@ -17,6 +21,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   var email;
   var mobileNo;
   var allDeals = [];
+  var previousRedeems = [];
 
   Future getAllDeals() async {
     var dealUrl = Uri.parse(
@@ -47,13 +52,6 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     var result2 = await http.get(url2);
 
     var body = await json.decode(result2.body);
-
-    // if (body['email'] != email) {
-    //   var body = await json.decode(result2.body);
-    //   print(body.values.singleWhere((e) {
-    //     print(e);
-    //   }));
-    // }
 
     setState(() {
       userData = body;
@@ -93,6 +91,64 @@ class _DashboardWidgetState extends State<DashboardWidget> {
         }));
 
     print(json.decode(result4.body));
+  }
+
+  Future getPreviousRedeems() async {
+    final SharedPreferences preference = await SharedPreferences.getInstance();
+    var dataId = preference.getString('dataId');
+    print("Data ID: " + dataId.toString());
+
+    var url2 = Uri.parse(
+        "https://petbottle-project-default-rtdb.firebaseio.com/usersdata/$dataId.json");
+
+    var data = await http.get(url2);
+    setState(() {
+      previousRedeems = json.decode(data.body)['previousRedeems'];
+    });
+  }
+
+  void updateRedeem(Map deal) async {
+    var urlForRedeem = Uri.parse(
+        "https://petbottle-project-default-rtdb.firebaseio.com/managerdeals/manager.json");
+    allDeals = allDeals.map((e) {
+      if (e['dealName'] == deal['dealName']) {
+        print(e);
+        e['redeems'] += 1;
+        return e;
+      } else {
+        return e;
+      }
+    }).toList();
+
+    var resultForRedeem = await http.patch(urlForRedeem,
+        headers: {"Content-Type": "application/json"},
+        body: json.encode({"deals": allDeals}));
+
+    var body = json.decode(resultForRedeem.body);
+    print(body);
+
+    final SharedPreferences preference = await SharedPreferences.getInstance();
+    var dataId = preference.getString('dataId');
+    print("Data ID: " + dataId.toString());
+
+    var url2 = Uri.parse(
+        "https://petbottle-project-default-rtdb.firebaseio.com/usersdata/$dataId.json");
+
+    var data = await http.get(url2);
+    var decodedRedeem = json.decode(data.body);
+    var redeem = [];
+    if (decodedRedeem['previousRedeems'] != null) {
+      redeem = decodedRedeem['previousRedeems'];
+    }
+
+    var result2 = await http.patch(url2,
+        headers: {"Content-Type": "application/json"},
+        body: json.encode({
+          "previousRedeems": [...redeem, deal]
+        }));
+
+    var body2 = await json.decode(result2.body);
+    print("User: $body2");
   }
 
   Future<void> _showMyDialog(String msg) async {
@@ -238,15 +294,48 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                       //   )
                                       // ]),
                                       child: ListTile(
-                                        title: Text(
-                                          allDeals[index]['dealName'],
-                                          style: TextStyle(
-                                              fontSize: 15.0,
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                        subtitle: Text(
-                                            allDeals[index]['requiredPoints']),
-                                      ));
+                                          leading: new Image.memory(
+                                              base64.decode(
+                                                  allDeals[index]['image'])),
+                                          title: Column(children: [
+                                            Text(
+                                              allDeals[index]['dealName'],
+                                              style: TextStyle(
+                                                  fontSize: 15.0,
+                                                  fontWeight: FontWeight.bold),
+                                            )
+                                          ]),
+                                          subtitle: Container(
+                                              margin: EdgeInsets.only(
+                                                  top: 10.0, bottom: 10.0),
+                                              child: Column(
+                                                children: [
+                                                  Text(allDeals[index]
+                                                      ['address']),
+                                                  Text(allDeals[index]
+                                                          ['requiredPoints'] +
+                                                      " Points"),
+                                                  Container(
+                                                      child: ElevatedButton(
+                                                          child: Text("Redeem"),
+                                                          onPressed: () {
+                                                            updateRedeem(
+                                                                allDeals[
+                                                                    index]);
+                                                          },
+                                                          style: ButtonStyle(
+                                                              backgroundColor:
+                                                                  MaterialStateProperty.all<
+                                                                          Color>(
+                                                                      Colors
+                                                                          .lightGreen
+                                                                          .shade800),
+                                                              fixedSize: MaterialStateProperty
+                                                                  .all(Size
+                                                                      .fromWidth(
+                                                                          120)))))
+                                                ],
+                                              ))));
                                 },
                               ),
                             ),
@@ -255,13 +344,13 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                 ),
                 Column(
                   children: [
-                    allDeals.length == 0
+                    previousRedeems.length == 0
                         ? Container(
                             margin: EdgeInsets.only(top: 30.0),
                             child: ElevatedButton(
                                 child: Text("Show previous Redeems"),
                                 onPressed: () {
-                                  getAllDeals()
+                                  getPreviousRedeems()
                                       .whenComplete(() => print("Fetched!!!"));
                                 },
                                 style: ButtonStyle(
@@ -278,7 +367,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                         height: 200.0,
                         child: new ListView.builder(
                           scrollDirection: Axis.vertical,
-                          itemCount: allDeals.length,
+                          itemCount: previousRedeems.length,
                           itemBuilder: (BuildContext ctxt, int index) {
                             return new Container(
                                 margin: EdgeInsets.all(5.0),
@@ -289,13 +378,13 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                 )),
                                 child: ListTile(
                                   title: Text(
-                                    allDeals[index]['dealName'],
+                                    previousRedeems[index]['dealName'],
                                     style: TextStyle(
                                         fontSize: 15.0,
                                         fontWeight: FontWeight.bold),
                                   ),
-                                  subtitle:
-                                      Text(allDeals[index]['requiredPoints']),
+                                  subtitle: Text(
+                                      previousRedeems[index]['requiredPoints']),
                                 ));
                           },
                         ),

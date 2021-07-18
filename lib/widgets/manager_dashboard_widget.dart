@@ -2,6 +2,8 @@ import "package:flutter/material.dart";
 import "package:flutter_icons/flutter_icons.dart";
 import "package:http/http.dart" as http;
 import "dart:convert";
+import "dart:io" as IO;
+import 'package:image_picker/image_picker.dart';
 import "package:shared_preferences/shared_preferences.dart";
 
 class ManagerDashboardWidget extends StatefulWidget {
@@ -14,7 +16,10 @@ class ManagerDashboardWidget extends StatefulWidget {
 class _ManagerDashboardWidgetState extends State<ManagerDashboardWidget> {
   String dealName = "";
   String requiredPoints = "";
+  String address = "";
   var allDeals = [];
+  IO.File _image = IO.File("");
+  final ImagePicker picker = ImagePicker();
 
   Future getAllDeals(managerEmail) async {
     var dealUrl = Uri.parse(
@@ -28,6 +33,39 @@ class _ManagerDashboardWidgetState extends State<ManagerDashboardWidget> {
     });
   }
 
+  _imgFromGallery() async {
+    IO.File image = await ImagePicker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 50,
+    );
+
+    setState(() {
+      _image = image;
+    });
+  }
+
+  void _showPicker(context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext bc) {
+          return SafeArea(
+            child: Container(
+              child: new Wrap(
+                children: <Widget>[
+                  new ListTile(
+                      leading: new Icon(Icons.photo_library),
+                      title: new Text('Photo Library'),
+                      onTap: () {
+                        _imgFromGallery();
+                        Navigator.of(context).pop();
+                      }),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
   void handleDealAddition() async {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var managerEmail = preference.getString('email')?.split("@")[0];
@@ -36,12 +74,20 @@ class _ManagerDashboardWidgetState extends State<ManagerDashboardWidget> {
 
     getAllDeals(managerEmail).whenComplete(() async {
       print(allDeals);
+      final bytes = await IO.File(_image.path).readAsBytes();
+      String img64 = base64Encode(bytes);
       var result2 = await http.patch(dealUrl,
           headers: {"Content-Type": "application/json"},
           body: json.encode({
             "deals": [
               ...allDeals,
-              {"dealName": dealName, "requiredPoints": requiredPoints}
+              {
+                "dealName": dealName,
+                "requiredPoints": requiredPoints,
+                "image": img64,
+                "address": address,
+                "redeems": 0
+              }
             ],
             "managerEmail": preference.getString('email')
           }));
@@ -109,6 +155,44 @@ class _ManagerDashboardWidgetState extends State<ManagerDashboardWidget> {
                       cursorColor: Color.fromRGBO(0, 200, 0, 1),
                       maxLength: 20,
                     ),
+                    TextFormField(
+                      decoration: InputDecoration(
+                          labelText: "Address",
+                          prefixIcon: Icon(FlutterIcons.address_book_faw,
+                              color: Color.fromRGBO(0, 200, 0, 1))),
+                      onChanged: (v) {
+                        address = v;
+                      },
+                      cursorColor: Color.fromRGBO(0, 200, 0, 1),
+                      maxLength: 20,
+                    ),
+                    CircleAvatar(
+                        radius: 50,
+                        backgroundColor: Color.fromRGBO(255, 255, 255, 1),
+                        child: _image != null
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(50),
+                                child: Image.file(
+                                  _image,
+                                  width: 100,
+                                  height: 150,
+                                  fit: BoxFit.fitHeight,
+                                ),
+                              )
+                            : ClipRRect()),
+                    Container(
+                        margin: EdgeInsets.only(top: 30.0),
+                        child: ElevatedButton(
+                            child: Text("Upload an Image"),
+                            onPressed: () {
+                              _showPicker(context);
+                            },
+                            style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStateProperty.all<Color>(
+                                        Colors.lightGreen.shade800),
+                                fixedSize: MaterialStateProperty.all(
+                                    Size.fromWidth(320))))),
                     Container(
                         margin: EdgeInsets.only(top: 30.0),
                         child: ElevatedButton(
@@ -154,6 +238,10 @@ class _ManagerDashboardWidgetState extends State<ManagerDashboardWidget> {
                                   width: 1.0,
                                 )),
                                 child: ListTile(
+                                  trailing: Column(children: [
+                                    Text("Redeems"),
+                                    Text(allDeals[index]['redeems'].toString())
+                                  ]),
                                   title: Text(
                                     allDeals[index]['dealName'],
                                     style: TextStyle(
@@ -161,8 +249,9 @@ class _ManagerDashboardWidgetState extends State<ManagerDashboardWidget> {
                                         fontWeight: FontWeight.bold),
                                   ),
                                   subtitle: Text(allDeals[index]
-                                          ['requiredPoints']
-                                      .toString()),
+                                              ['requiredPoints']
+                                          .toString() +
+                                      " Points"),
                                 ));
                           },
                         ),

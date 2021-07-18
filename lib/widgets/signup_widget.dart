@@ -84,7 +84,7 @@ class _SignupWidgetState extends State<SignupWidget> {
             "firstName": firstName,
             "lastName": lastName,
             "permanentAddress": permanentAddress,
-            "mobileNo": mobileNo
+            "mobileNo": mobileNo,
           }));
 
       Map body2 = json.decode(result2.body);
