@@ -5,7 +5,7 @@ import "package:flutter/material.dart";
 import "./login_widget.dart";
 // import 'dart:io' as IO;
 import "package:flutter_icons/flutter_icons.dart";
-
+import 'package:fluttertoast/fluttertoast.dart';
 import "dart:convert";
 // import 'dart:typed_data';
 import "package:shared_preferences/shared_preferences.dart";
@@ -154,14 +154,31 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     if (decodedRedeem['previousRedeems'] != null) {
       redeem = decodedRedeem['previousRedeems'];
     }
+    var currentPoints = decodedRedeem['points'];
+    var requiredPoints = deal['requiredPoints'];
+    var newPoints;
+    if (currentPoints >= requiredPoints) {
+      newPoints = decodedRedeem['points'] - deal['requiredPoints'];
+      var result2 = await http.patch(url2,
+          headers: {"Content-Type": "application/json"},
+          body: json.encode({
+            "previousRedeems": [...redeem, deal],
+            "points": newPoints
+          }));
 
-    var result2 = await http.patch(url2,
-        headers: {"Content-Type": "application/json"},
-        body: json.encode({
-          "previousRedeems": [...redeem, deal]
-        }));
-
-    var body2 = await json.decode(result2.body);
+      var body2 = await json.decode(result2.body);
+      handleData();
+    } else {
+      print("Points not Enough!!");
+      // Fluttertoast.showToast(
+      //     msg: "Points not Enough!!",
+      //     toastLength: Toast.LENGTH_SHORT,
+      //     gravity: ToastGravity.CENTER,
+      //     timeInSecForIosWeb: 1,
+      //     backgroundColor: Colors.red,
+      //     textColor: Colors.white,
+      //     fontSize: 16.0);
+    }
   }
 
   Future<void> _showMyDialog(String msg) async {
@@ -316,6 +333,22 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                         Colors.lightGreen.shade800),
                                 fixedSize: MaterialStateProperty.all(
                                     Size.fromWidth(320))))),
+                    filterStatus == true
+                        ? Container(
+                            child: ElevatedButton(
+                                child: Text("Show all Deals"),
+                                onPressed: () {
+                                  setState(() {
+                                    filterStatus = false;
+                                  });
+                                },
+                                style: ButtonStyle(
+                                    backgroundColor:
+                                        MaterialStateProperty.all<Color>(
+                                            Colors.lightGreen.shade800),
+                                    fixedSize: MaterialStateProperty.all(
+                                        Size.fromWidth(320)))))
+                        : Text(""),
                     allDeals.length == 0
                         ? Container(
                             margin: EdgeInsets.only(top: 30.0), child: Text(""))
@@ -513,8 +546,9 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                         fontSize: 15.0,
                                         fontWeight: FontWeight.bold),
                                   ),
-                                  subtitle: Text(
-                                      previousRedeems[index]['requiredPoints']),
+                                  subtitle: Text(previousRedeems[index]
+                                          ['requiredPoints']
+                                      .toString()),
                                 ));
                           },
                         ),

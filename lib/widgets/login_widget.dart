@@ -63,7 +63,7 @@ class _LoginWidgetState extends State<LoginWidget> {
     return Scaffold(
         appBar: AppBar(
           title: Text(
-            "Login",
+            "Reverse Vending Machine",
           ),
           backgroundColor: Color.fromRGBO(0, 200, 0, 1),
         ),
@@ -131,19 +131,38 @@ class _LoginWidgetState extends State<LoginWidget> {
                       })),
                       hoverColor: Color.fromRGBO(0, 255, 0, 1),
                     ))),
-                Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text("Powered by NCAI"),
-                        Image(
-                          image: AssetImage('assets/images/ncai_logo.png'),
-                          width: 20,
-                          height: 20,
-                        ),
-                      ],
-                    ))
+                Text("Powered by NCAI",
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                Container(
+                    margin: EdgeInsets.only(top: 10.0),
+                    child: Align(
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                          Container(
+                              padding: EdgeInsets.all(5.0),
+                              child: Image(
+                                image: AssetImage('assets/images/ned_logo.png'),
+                                width: 70,
+                                height: 70,
+                              )),
+                          Container(
+                              padding: EdgeInsets.all(5.0),
+                              child: Image(
+                                image:
+                                    AssetImage('assets/images/ncai_logo.png'),
+                                width: 70,
+                                height: 70,
+                              )),
+                          Container(
+                              padding: EdgeInsets.all(5.0),
+                              child: Image(
+                                image: AssetImage(
+                                    'assets/images/smartCityLab_logo.png'),
+                                width: 70,
+                                height: 70,
+                              )),
+                        ])))
               ],
             ))));
   }
