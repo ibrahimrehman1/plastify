@@ -176,7 +176,7 @@ class _ManagerDashboardWidgetState extends State<ManagerDashboardWidget> {
                                   _image,
                                   width: 100,
                                   height: 150,
-                                  fit: BoxFit.fitHeight,
+                                  fit: BoxFit.fill,
                                 ),
                               )
                             : ClipRRect()),

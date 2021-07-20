@@ -25,13 +25,19 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
   Future getAllDeals() async {
     var dealUrl = Uri.parse(
-        "https://petbottle-project-default-rtdb.firebaseio.com/managerdeals/manager.json");
+        "https://petbottle-project-default-rtdb.firebaseio.com/managerdeals.json");
 
     var allEmailsResult = await http.get(dealUrl);
-    var body = json.decode(allEmailsResult.body);
+    Map body = json.decode(allEmailsResult.body);
     print("All Deals: " + body.toString());
+    var arr = [];
+    body.forEach((key, value) {
+      List val = value['deals'];
+      arr.addAll(val);
+    });
+    print("Array: $arr");
     setState(() {
-      allDeals = body['deals'];
+      allDeals = arr;
     });
   }
 
@@ -219,6 +225,14 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   @override
   Widget build(BuildContext context) {
 // Try reading data from the counter key. If it doesn't exist, return 0.
+    if (allDeals.length == 0) {
+      getAllDeals().whenComplete(() => print("Deals Fetched!!!"));
+    }
+
+    if (previousRedeems.length == 0) {
+      getPreviousRedeems()
+          .whenComplete(() => print("Previous Redeems Fetched!!!"));
+    }
 
     return Scaffold(
         body: DefaultTabController(
@@ -255,19 +269,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                   children: [
                     allDeals.length == 0
                         ? Container(
-                            margin: EdgeInsets.only(top: 30.0),
-                            child: ElevatedButton(
-                                child: Text("Show available Deals"),
-                                onPressed: () {
-                                  getAllDeals()
-                                      .whenComplete(() => print("Fetched!!!"));
-                                },
-                                style: ButtonStyle(
-                                    backgroundColor:
-                                        MaterialStateProperty.all<Color>(
-                                            Colors.lightGreen.shade800),
-                                    fixedSize: MaterialStateProperty.all(
-                                        Size.fromWidth(320)))))
+                            margin: EdgeInsets.only(top: 30.0), child: Text(""))
                         : Expanded(
                             child: SizedBox(
                               height: 200.0,
@@ -281,22 +283,20 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                           border: Border.all(
                                         color: Colors.black,
                                         width: 1.0,
-                                      )), // decoration: BoxDecoration(boxShadow: [
-                                      //   BoxShadow(
-
-                                      //     color: Color.fromRGBO(50, 50, 50, .4),
-                                      //     offset: const Offset(
-                                      //       5.0,
-                                      //       5.0,
-                                      //     ),
-                                      //     blurRadius: 10.0,
-                                      //     spreadRadius: 2.0,
-                                      //   )
-                                      // ]),
+                                      )),
                                       child: ListTile(
-                                          leading: new Image.memory(
-                                              base64.decode(
-                                                  allDeals[index]['image'])),
+                                          leading: Container(
+                                              // margin:
+                                              //     EdgeInsets.only(top: 10.0),
+                                              // height: 150,
+                                              child: Column(children: [
+                                            new Image.memory(
+                                                base64.decode(
+                                                    allDeals[index]['image']),
+                                                width: 100,
+                                                height: 50,
+                                                fit: BoxFit.fill)
+                                          ])),
                                           title: Column(children: [
                                             Text(
                                               allDeals[index]['dealName'],
@@ -346,19 +346,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                   children: [
                     previousRedeems.length == 0
                         ? Container(
-                            margin: EdgeInsets.only(top: 30.0),
-                            child: ElevatedButton(
-                                child: Text("Show previous Redeems"),
-                                onPressed: () {
-                                  getPreviousRedeems()
-                                      .whenComplete(() => print("Fetched!!!"));
-                                },
-                                style: ButtonStyle(
-                                    backgroundColor:
-                                        MaterialStateProperty.all<Color>(
-                                            Colors.lightGreen.shade800),
-                                    fixedSize: MaterialStateProperty.all(
-                                        Size.fromWidth(320)))))
+                            margin: EdgeInsets.only(top: 30.0), child: Text(""))
                         : Text("Previous Redeems",
                             style: TextStyle(
                                 fontSize: 30.0, fontWeight: FontWeight.bold)),

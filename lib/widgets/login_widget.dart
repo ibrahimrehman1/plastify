@@ -1,6 +1,7 @@
 import 'package:app/widgets/admin_dashboard_widget.dart';
 import "package:flutter/material.dart";
 import "package:flutter_icons/flutter_icons.dart";
+import "./signup_widget.dart";
 import "package:http/http.dart" as http;
 import "dart:convert";
 import "package:shared_preferences/shared_preferences.dart";
@@ -75,7 +76,7 @@ class _LoginWidgetState extends State<LoginWidget> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Image(
-                  image: AssetImage('assets/images/ncai_logo.png'),
+                  image: AssetImage('assets/images/petbottle_logo.png'),
                   width: 150,
                   height: 150,
                 ),
@@ -115,7 +116,34 @@ class _LoginWidgetState extends State<LoginWidget> {
                             backgroundColor: MaterialStateProperty.all<Color>(
                                 Colors.lightGreen.shade800),
                             fixedSize: MaterialStateProperty.all(
-                                Size.fromWidth(320)))))
+                                Size.fromWidth(320))))),
+                Container(
+                    padding: EdgeInsets.only(top: 10.0, bottom: 20.0),
+                    child: Material(
+                        child: InkWell(
+                      child: Text(
+                        "Don't have an Account? Sign Up",
+                        style: TextStyle(decoration: TextDecoration.underline),
+                      ),
+                      onTap: () => Navigator.of(context)
+                          .push(MaterialPageRoute(builder: (_) {
+                        return SignupWidget();
+                      })),
+                      hoverColor: Color.fromRGBO(0, 255, 0, 1),
+                    ))),
+                Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Powered by NCAI"),
+                        Image(
+                          image: AssetImage('assets/images/ncai_logo.png'),
+                          width: 30,
+                          height: 30,
+                        ),
+                      ],
+                    ))
               ],
             ))));
   }

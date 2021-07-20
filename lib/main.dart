@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import "package:flutter_icons/flutter_icons.dart";
-import "./widgets/signup_widget.dart";
+import "./widgets/login_widget.dart";
 
 void main() {
   runApp(MyApp());
@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: SignupWidget(),
+      home: LoginWidget(),
       navigatorKey: navigatorKey,
     );
   }

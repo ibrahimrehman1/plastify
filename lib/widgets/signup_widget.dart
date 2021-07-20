@@ -21,8 +21,6 @@ class _SignupWidgetState extends State<SignupWidget> {
 
   String lastName = "";
 
-  String permanentAddress = "";
-
   String mobileNo = "";
 
   String emailAddress = "";
@@ -83,7 +81,6 @@ class _SignupWidgetState extends State<SignupWidget> {
             "idToken": idToken,
             "firstName": firstName,
             "lastName": lastName,
-            "permanentAddress": permanentAddress,
             "mobileNo": mobileNo,
           }));
 
@@ -111,11 +108,11 @@ class _SignupWidgetState extends State<SignupWidget> {
             padding: EdgeInsets.all(16.0),
             child: SingleChildScrollView(
                 child: Column(children: [
-              Image(
-                image: AssetImage('assets/images/ncai_logo.png'),
-                width: 150,
-                height: 150,
-              ),
+              // Image(
+              //   image: AssetImage('assets/images/petbottle_logo.svg'),
+              //   width: 150,
+              //   height: 150,
+              // ),
               Container(margin: EdgeInsets.only(top: 20.0)),
               TextFormField(
                 decoration: InputDecoration(
@@ -150,16 +147,6 @@ class _SignupWidgetState extends State<SignupWidget> {
                   emailAddress = v;
                 },
                 maxLength: 50,
-              ),
-              TextFormField(
-                decoration: InputDecoration(
-                    labelText: "Permanent Address",
-                    prefixIcon: Icon(FlutterIcons.address_book_o_faw,
-                        color: Color.fromRGBO(0, 200, 0, 1))),
-                onChanged: (v) {
-                  permanentAddress = v;
-                },
-                maxLength: 100,
               ),
               TextFormField(
                 decoration: InputDecoration(

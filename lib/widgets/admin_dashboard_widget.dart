@@ -12,43 +12,39 @@ class AdminDashboardWidget extends StatefulWidget {
 }
 
 class _AdminDashboardWidgetState extends State<AdminDashboardWidget> {
-  String dealName = "";
-  String requiredPoints = "";
+  String managerEmail = "";
+  String managerPassword = "";
   var allDeals = [];
 
   Future getAllDeals(managerEmail) async {
     var dealUrl = Uri.parse(
-        "https://petbottle-project-default-rtdb.firebaseio.com/managerdeals/$managerEmail.json");
+        "https://petbottle-project-default-rtdb.firebaseio.com/managerdeals.json");
 
     var allEmailsResult = await http.get(dealUrl);
-    var body = json.decode(allEmailsResult.body);
+    Map body = json.decode(allEmailsResult.body);
     print("All Deals: " + body.toString());
+    var arr = [];
+    body.forEach((key, value) {
+      List val = value['deals'];
+      arr.addAll(val);
+    });
+    print("Array: $arr");
     setState(() {
-      allDeals = body['deals'];
+      allDeals = arr;
     });
   }
 
-  void handleManagerAddition() async {
-    final SharedPreferences preference = await SharedPreferences.getInstance();
-    var managerEmail = preference.getString('email')?.split("@")[0];
-    var dealUrl = Uri.parse(
-        "https://petbottle-project-default-rtdb.firebaseio.com/managerdeals/$managerEmail.json");
-
-    getAllDeals(managerEmail).whenComplete(() async {
-      print(allDeals);
-      var result2 = await http.patch(dealUrl,
-          headers: {"Content-Type": "application/json"},
-          body: json.encode({
-            "deals": [
-              ...allDeals,
-              {"dealName": dealName, "requiredPoints": requiredPoints}
-            ],
-            "managerEmail": preference.getString('email')
-          }));
-
-      var body = json.decode(result2.body);
-      print(body);
-    });
+  void addManager() async {
+    var url = Uri.parse(
+        "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyD6FVCXVR7SqRD2rjavBUAantQxi8Qpz-4");
+    var result = await http.post(url,
+        body: json.encode({
+          "email": managerEmail,
+          "password": managerPassword,
+          "returnSecureToken": true
+        }));
+    Map body = json.decode(result.body);
+    print(body);
   }
 
   void handleShowDeals() async {
@@ -79,19 +75,20 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> {
                 EdgeInsets.only(top: 15.0, left: 5.0, right: 5.0, bottom: 5.0),
             child: TabBarView(
               children: [
-                Column(
+                SingleChildScrollView(
+                    child: Column(
                   children: [
                     Text("Add Manager", style: TextStyle(fontSize: 20.0)),
                     TextFormField(
                       decoration: InputDecoration(
-                          labelText: "Manager Name",
+                          labelText: "Manager Email",
                           prefixIcon: Icon(FlutterIcons.shopping_bag_ent,
                               color: Color.fromRGBO(0, 200, 0, 1))),
                       onChanged: (v) {
-                        dealName = v;
+                        managerEmail = v;
                       },
                       cursorColor: Color.fromRGBO(0, 200, 0, 1),
-                      maxLength: 20,
+                      maxLength: 50,
                     ),
                     TextFormField(
                       decoration: InputDecoration(
@@ -99,7 +96,7 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> {
                           prefixIcon: Icon(FlutterIcons.passport_biometric_mco,
                               color: Color.fromRGBO(0, 200, 0, 1))),
                       onChanged: (v) {
-                        requiredPoints = v;
+                        managerPassword = v;
                       },
                       cursorColor: Color.fromRGBO(0, 200, 0, 1),
                       maxLength: 20,
@@ -108,7 +105,7 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> {
                         margin: EdgeInsets.only(top: 30.0),
                         child: ElevatedButton(
                             child: Text("Add Manager"),
-                            onPressed: () => handleManagerAddition(),
+                            onPressed: () => addManager(),
                             style: ButtonStyle(
                                 backgroundColor:
                                     MaterialStateProperty.all<Color>(
@@ -116,7 +113,7 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> {
                                 fixedSize: MaterialStateProperty.all(
                                     Size.fromWidth(320)))))
                   ],
-                ),
+                )),
                 Column(
                   children: [
                     allDeals.length == 0
@@ -141,16 +138,33 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> {
                           scrollDirection: Axis.vertical,
                           itemCount: allDeals.length,
                           itemBuilder: (BuildContext ctxt, int index) {
-                            return new ListTile(
-                              title: Text(
-                                allDeals[index]['dealName'],
-                                style: TextStyle(
-                                    fontSize: 15.0,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              subtitle: Text(
-                                  allDeals[index]['requiredPoints'].toString()),
-                            );
+                            return new Container(
+                                margin: EdgeInsets.all(5.0),
+                                decoration: BoxDecoration(
+                                    border: Border.all(
+                                  color: Colors.black,
+                                  width: 1.0,
+                                )),
+                                child: ListTile(
+                                    leading: new Image.memory(base64
+                                        .decode(allDeals[index]['image'])),
+                                    title: Column(children: [
+                                      Text(
+                                        allDeals[index]['dealName'],
+                                        style: TextStyle(
+                                            fontSize: 15.0,
+                                            fontWeight: FontWeight.bold),
+                                      )
+                                    ]),
+                                    subtitle: Container(
+                                        margin: EdgeInsets.only(
+                                            top: 10.0, bottom: 10.0),
+                                        child: Column(children: [
+                                          Text(allDeals[index]['address']),
+                                          Text(allDeals[index]
+                                                  ['requiredPoints'] +
+                                              " Points"),
+                                        ]))));
                           },
                         ),
                       ),
