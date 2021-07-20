@@ -91,6 +91,7 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> {
                       maxLength: 50,
                     ),
                     TextFormField(
+                      obscureText: true,
                       decoration: InputDecoration(
                           labelText: "Manager Password",
                           prefixIcon: Icon(FlutterIcons.passport_biometric_mco,

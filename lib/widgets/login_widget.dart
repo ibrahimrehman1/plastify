@@ -77,8 +77,8 @@ class _LoginWidgetState extends State<LoginWidget> {
               children: [
                 Image(
                   image: AssetImage('assets/images/petbottle_logo.png'),
-                  width: 150,
-                  height: 150,
+                  width: 200,
+                  height: 200,
                 ),
                 Container(margin: EdgeInsets.only(top: 20.0)),
                 TextFormField(
@@ -139,8 +139,8 @@ class _LoginWidgetState extends State<LoginWidget> {
                         Text("Powered by NCAI"),
                         Image(
                           image: AssetImage('assets/images/ncai_logo.png'),
-                          width: 30,
-                          height: 30,
+                          width: 20,
+                          height: 20,
                         ),
                       ],
                     ))

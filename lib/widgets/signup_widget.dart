@@ -28,6 +28,7 @@ class _SignupWidgetState extends State<SignupWidget> {
   String password = "";
 
   String confirmPassword = "";
+  num points = 0;
 
   void initState() {
     getEmail().whenComplete(() async => {print("")});
@@ -82,6 +83,7 @@ class _SignupWidgetState extends State<SignupWidget> {
             "firstName": firstName,
             "lastName": lastName,
             "mobileNo": mobileNo,
+            "points": points
           }));
 
       Map body2 = json.decode(result2.body);

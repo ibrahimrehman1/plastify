@@ -15,8 +15,10 @@ class ManagerDashboardWidget extends StatefulWidget {
 
 class _ManagerDashboardWidgetState extends State<ManagerDashboardWidget> {
   String dealName = "";
-  String requiredPoints = "";
+  num requiredPoints = 0;
   String address = "";
+  num originalPrice = 0;
+  num percentDiscount = 0;
   var allDeals = [];
   IO.File _image = IO.File("");
   final ImagePicker picker = ImagePicker();
@@ -76,19 +78,21 @@ class _ManagerDashboardWidgetState extends State<ManagerDashboardWidget> {
       print(allDeals);
       final bytes = await IO.File(_image.path).readAsBytes();
       String img64 = base64Encode(bytes);
+      Map newDeal = {
+        "dealName": dealName,
+        "percentDiscount": percentDiscount,
+        "originalPrice": originalPrice,
+        "requiredPoints": requiredPoints,
+        "image": img64,
+        "address": address,
+        "redeems": 0
+      };
+
+      allDeals.add(newDeal);
       var result2 = await http.patch(dealUrl,
           headers: {"Content-Type": "application/json"},
           body: json.encode({
-            "deals": [
-              ...allDeals,
-              {
-                "dealName": dealName,
-                "requiredPoints": requiredPoints,
-                "image": img64,
-                "address": address,
-                "redeems": 0
-              }
-            ],
+            "deals": [...allDeals.toList()],
             "managerEmail": preference.getString('email')
           }));
 
@@ -101,6 +105,23 @@ class _ManagerDashboardWidgetState extends State<ManagerDashboardWidget> {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var managerEmail = preference.getString('email')?.split("@")[0];
     getAllDeals(managerEmail).whenComplete(() => print("Fetched!!!"));
+  }
+
+  void handleDealRemove(index) async {
+    setState(() {
+      allDeals.removeAt(index);
+    });
+    final SharedPreferences preference = await SharedPreferences.getInstance();
+    var managerEmail = preference.getString('email')?.split("@")[0];
+    var dealUrl = Uri.parse(
+        "https://petbottle-project-default-rtdb.firebaseio.com/managerdeals/$managerEmail.json");
+
+    var result2 = await http.patch(dealUrl,
+        headers: {"Content-Type": "application/json"},
+        body: json.encode({
+          "deals": [...allDeals.toList()],
+          "managerEmail": preference.getString('email')
+        }));
   }
 
   @override
@@ -142,15 +163,40 @@ class _ManagerDashboardWidgetState extends State<ManagerDashboardWidget> {
                             dealName = v;
                           },
                           cursorColor: Color.fromRGBO(0, 200, 0, 1),
-                          maxLength: 20,
+                          maxLength: 50,
                         )),
                     TextFormField(
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                          labelText: "Original Deal Price",
+                          prefixIcon: Icon(FlutterIcons.shopping_bag_ent,
+                              color: Color.fromRGBO(0, 200, 0, 1))),
+                      onChanged: (v) {
+                        originalPrice = num.parse(v);
+                      },
+                      cursorColor: Color.fromRGBO(0, 200, 0, 1),
+                      maxLength: 20,
+                    ),
+                    TextFormField(
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                          labelText: "% Discount",
+                          prefixIcon: Icon(FlutterIcons.shopping_bag_ent,
+                              color: Color.fromRGBO(0, 200, 0, 1))),
+                      onChanged: (v) {
+                        percentDiscount = num.parse(v);
+                      },
+                      cursorColor: Color.fromRGBO(0, 200, 0, 1),
+                      maxLength: 20,
+                    ),
+                    TextFormField(
+                      keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                           labelText: "Required Points",
                           prefixIcon: Icon(FlutterIcons.shopping_bag_ent,
                               color: Color.fromRGBO(0, 200, 0, 1))),
                       onChanged: (v) {
-                        requiredPoints = v;
+                        requiredPoints = num.parse(v);
                       },
                       cursorColor: Color.fromRGBO(0, 200, 0, 1),
                       maxLength: 20,
@@ -164,7 +210,7 @@ class _ManagerDashboardWidgetState extends State<ManagerDashboardWidget> {
                         address = v;
                       },
                       cursorColor: Color.fromRGBO(0, 200, 0, 1),
-                      maxLength: 20,
+                      maxLength: 50,
                     ),
                     CircleAvatar(
                         radius: 50,
@@ -240,7 +286,7 @@ class _ManagerDashboardWidgetState extends State<ManagerDashboardWidget> {
                                 child: ListTile(
                                   trailing: Column(children: [
                                     Text("Redeems"),
-                                    Text(allDeals[index]['redeems'].toString())
+                                    Text(allDeals[index]['redeems'].toString()),
                                   ]),
                                   title: Text(
                                     allDeals[index]['dealName'],
@@ -248,10 +294,29 @@ class _ManagerDashboardWidgetState extends State<ManagerDashboardWidget> {
                                         fontSize: 15.0,
                                         fontWeight: FontWeight.bold),
                                   ),
-                                  subtitle: Text(allDeals[index]
-                                              ['requiredPoints']
-                                          .toString() +
-                                      " Points"),
+                                  subtitle: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(allDeals[index]['requiredPoints']
+                                                .toString() +
+                                            " Points"),
+                                        Container(
+                                            child: ElevatedButton(
+                                                child: Text("Remove Deal"),
+                                                onPressed: () =>
+                                                    handleDealRemove(index),
+                                                style: ButtonStyle(
+                                                    backgroundColor:
+                                                        MaterialStateProperty
+                                                            .all<Color>(Colors
+                                                                .lightGreen
+                                                                .shade800),
+                                                    fixedSize:
+                                                        MaterialStateProperty
+                                                            .all(Size.fromWidth(
+                                                                150)))))
+                                      ]),
                                 ));
                           },
                         ),

@@ -1,14 +1,17 @@
-import 'dart:math';
+// import 'dart:math';
 
 import "package:flutter/material.dart";
-import "./signup_widget.dart";
-import 'dart:io' as IO;
+// import "./signup_widget.dart";
+import "./login_widget.dart";
+// import 'dart:io' as IO;
+import "package:flutter_icons/flutter_icons.dart";
+
 import "dart:convert";
-import 'dart:typed_data';
+// import 'dart:typed_data';
 import "package:shared_preferences/shared_preferences.dart";
 import "package:http/http.dart" as http;
 
-var userData = null;
+var userData;
 
 class DashboardWidget extends StatefulWidget {
   @override
@@ -20,8 +23,11 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   var lastName;
   var email;
   var mobileNo;
+  var location;
   var allDeals = [];
   var previousRedeems = [];
+  var filteredDeals = [];
+  bool filterStatus = false;
 
   Future getAllDeals() async {
     var dealUrl = Uri.parse(
@@ -29,16 +35,20 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
     var allEmailsResult = await http.get(dealUrl);
     Map body = json.decode(allEmailsResult.body);
-    print("All Deals: " + body.toString());
-    var arr = [];
-    body.forEach((key, value) {
-      List val = value['deals'];
-      arr.addAll(val);
-    });
-    print("Array: $arr");
-    setState(() {
-      allDeals = arr;
-    });
+    if (body.runtimeType != Null) {
+      print("All Deals: " + body.toString());
+      var arr = [];
+      body.forEach((key, value) {
+        if (value['deals'] != null) {
+          List val = value['deals'];
+          arr.addAll(val);
+        }
+      });
+      print("Runtime Type");
+      setState(() {
+        allDeals = arr;
+      });
+    }
   }
 
   List<String> productsSubtitles = ["KFC", "Macdonald", "Starbucks"];
@@ -50,7 +60,6 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   Future handleData() async {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var dataId = preference.getString('dataId');
-    print("Data ID: " + dataId.toString());
 
     var url2 = Uri.parse(
         "https://petbottle-project-default-rtdb.firebaseio.com/usersdata/$dataId.json");
@@ -58,11 +67,11 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     var result2 = await http.get(url2);
 
     var body = await json.decode(result2.body);
-
-    setState(() {
-      userData = body;
-    });
-    print(result2.body.length);
+    if (body != null) {
+      setState(() {
+        userData = body;
+      });
+    }
   }
 
   Future updateData() async {
@@ -102,15 +111,17 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   Future getPreviousRedeems() async {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var dataId = preference.getString('dataId');
-    print("Data ID: " + dataId.toString());
 
     var url2 = Uri.parse(
         "https://petbottle-project-default-rtdb.firebaseio.com/usersdata/$dataId.json");
 
     var data = await http.get(url2);
-    setState(() {
-      previousRedeems = json.decode(data.body)['previousRedeems'];
-    });
+    var redeem = json.decode(data.body)['previousRedeems'];
+    if (redeem != null) {
+      setState(() {
+        previousRedeems = redeem;
+      });
+    }
   }
 
   void updateRedeem(Map deal) async {
@@ -118,7 +129,6 @@ class _DashboardWidgetState extends State<DashboardWidget> {
         "https://petbottle-project-default-rtdb.firebaseio.com/managerdeals/manager.json");
     allDeals = allDeals.map((e) {
       if (e['dealName'] == deal['dealName']) {
-        print(e);
         e['redeems'] += 1;
         return e;
       } else {
@@ -131,11 +141,9 @@ class _DashboardWidgetState extends State<DashboardWidget> {
         body: json.encode({"deals": allDeals}));
 
     var body = json.decode(resultForRedeem.body);
-    print(body);
 
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var dataId = preference.getString('dataId');
-    print("Data ID: " + dataId.toString());
 
     var url2 = Uri.parse(
         "https://petbottle-project-default-rtdb.firebaseio.com/usersdata/$dataId.json");
@@ -154,7 +162,6 @@ class _DashboardWidgetState extends State<DashboardWidget> {
         }));
 
     var body2 = await json.decode(result2.body);
-    print("User: $body2");
   }
 
   Future<void> _showMyDialog(String msg) async {
@@ -222,8 +229,26 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     );
   }
 
+  void filterDeals() {
+    print(location);
+    var arr = allDeals.where((val) {
+      print(val['address']);
+      if (val['address'].toString().toLowerCase().contains(location) == true) {
+        return true;
+      }
+      return false;
+    }).toList();
+    setState(() {
+      filteredDeals = arr;
+      filterStatus = true;
+    });
+    print(filteredDeals);
+  }
+
   @override
   Widget build(BuildContext context) {
+    print("All Deals: $allDeals");
+    print("Previous Redeems: ${previousRedeems}");
 // Try reading data from the counter key. If it doesn't exist, return 0.
     if (allDeals.length == 0) {
       getAllDeals().whenComplete(() => print("Deals Fetched!!!"));
@@ -253,11 +278,13 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                     padding: EdgeInsets.only(right: 20.0, top: 18.0),
                     child: GestureDetector(
                       onTap: () {},
-                      child: Text(
-                        "1200 Points",
-                        style: TextStyle(
-                            fontSize: 20.0, fontWeight: FontWeight.bold),
-                      ),
+                      child: userData != null
+                          ? Text(
+                              userData['points'].toString() + " Points",
+                              style: TextStyle(
+                                  fontSize: 20.0, fontWeight: FontWeight.bold),
+                            )
+                          : Text(""),
                     ))
               ]),
           body: Container(
@@ -267,6 +294,28 @@ class _DashboardWidgetState extends State<DashboardWidget> {
               children: [
                 Column(
                   children: [
+                    TextField(
+                      decoration: InputDecoration(
+                        labelText: "Filter by Location",
+                        prefixIcon: Icon(FlutterIcons.location_arrow_faw,
+                            color: Color.fromRGBO(0, 200, 0, 1)),
+                      ),
+                      onChanged: (v) {
+                        location = v;
+                      },
+                      maxLength: 30,
+                    ),
+                    Container(
+                        margin: EdgeInsets.only(top: 30.0),
+                        child: ElevatedButton(
+                            child: Text("Search"),
+                            onPressed: () => filterDeals(),
+                            style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStateProperty.all<Color>(
+                                        Colors.lightGreen.shade800),
+                                fixedSize: MaterialStateProperty.all(
+                                    Size.fromWidth(320))))),
                     allDeals.length == 0
                         ? Container(
                             margin: EdgeInsets.only(top: 30.0), child: Text(""))
@@ -275,46 +324,139 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                               height: 200.0,
                               child: new ListView.builder(
                                 scrollDirection: Axis.vertical,
-                                itemCount: allDeals.length,
+                                itemCount: filterStatus == false
+                                    ? allDeals.length
+                                    : filteredDeals.length,
                                 itemBuilder: (BuildContext ctxt, int index) {
                                   return new Container(
-                                      margin: EdgeInsets.all(5.0),
-                                      decoration: BoxDecoration(
-                                          border: Border.all(
-                                        color: Colors.black,
-                                        width: 1.0,
-                                      )),
+                                      margin: EdgeInsets.only(top: 30.0),
                                       child: ListTile(
-                                          leading: Container(
-                                              // margin:
-                                              //     EdgeInsets.only(top: 10.0),
-                                              // height: 150,
-                                              child: Column(children: [
-                                            new Image.memory(
-                                                base64.decode(
-                                                    allDeals[index]['image']),
-                                                width: 100,
-                                                height: 50,
-                                                fit: BoxFit.fill)
-                                          ])),
-                                          title: Column(children: [
-                                            Text(
-                                              allDeals[index]['dealName'],
-                                              style: TextStyle(
-                                                  fontSize: 15.0,
-                                                  fontWeight: FontWeight.bold),
-                                            )
-                                          ]),
+                                          title: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Stack(children: <Widget>[
+                                                  new Image.memory(
+                                                      base64.decode(
+                                                          filterStatus == false
+                                                              ? allDeals[index]
+                                                                  ['image']
+                                                              : filteredDeals[
+                                                                      index]
+                                                                  ['image']),
+                                                      width: 340,
+                                                      height: 180,
+                                                      fit: BoxFit.fill),
+                                                  Column(children: [
+                                                    Container(
+                                                        margin: EdgeInsets.only(
+                                                            top: 20.0),
+                                                        padding:
+                                                            EdgeInsets.all(5.0),
+                                                        width: 100,
+                                                        // height: 20,
+                                                        decoration: BoxDecoration(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10),
+                                                            color:
+                                                                Color.fromRGBO(
+                                                                    255,
+                                                                    40,
+                                                                    77,
+                                                                    1)),
+                                                        child: Text(
+                                                          filterStatus == false
+                                                              ? "${allDeals[index]['percentDiscount']}% OFF"
+                                                              : "${filteredDeals[index]['percentDiscount']}% OFF",
+                                                          textAlign:
+                                                              TextAlign.center,
+                                                          style: TextStyle(
+                                                              color: Color
+                                                                  .fromRGBO(
+                                                                      255,
+                                                                      255,
+                                                                      255,
+                                                                      1)),
+                                                        ))
+                                                  ]),
+                                                ]),
+                                                Text(
+                                                  filterStatus == false
+                                                      ? allDeals[index]
+                                                          ['dealName']
+                                                      : filteredDeals[index]
+                                                          ['dealName'],
+                                                  style: TextStyle(
+                                                      fontSize: 25.0,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                )
+                                              ]),
                                           subtitle: Container(
                                               margin: EdgeInsets.only(
                                                   top: 10.0, bottom: 10.0),
                                               child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
-                                                  Text(allDeals[index]
-                                                      ['address']),
-                                                  Text(allDeals[index]
-                                                          ['requiredPoints'] +
-                                                      " Points"),
+                                                  Text(filterStatus == false
+                                                      ? allDeals[index]
+                                                          ['address']
+                                                      : filteredDeals[index]
+                                                          ['address']),
+                                                  Text(
+                                                      "Original Price: " +
+                                                          (filterStatus == false
+                                                                  ? allDeals[index]
+                                                                          [
+                                                                          'originalPrice']
+                                                                      .toString()
+                                                                  : filteredDeals[
+                                                                          index]
+                                                                      [
+                                                                      'originalPrice'])
+                                                              .toString() +
+                                                          " Rs.",
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold)),
+                                                  Text(
+                                                      "Discounted Price: " +
+                                                          (filterStatus == false
+                                                              ? (allDeals[index][
+                                                                          'originalPrice'] -
+                                                                      (allDeals[index]['percentDiscount'] /
+                                                                              100) *
+                                                                          allDeals[index][
+                                                                              'originalPrice'])
+                                                                  .toString()
+                                                              : (filteredDeals[index][
+                                                                          'originalPrice'] -
+                                                                      (filteredDeals[index]['percentDiscount'] /
+                                                                              100) *
+                                                                          filteredDeals[index][
+                                                                              'originalPrice'])
+                                                                  .toString()) +
+                                                          " Rs.",
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold)),
+                                                  Text(
+                                                      "Required Points: " +
+                                                          (filterStatus == false
+                                                              ? allDeals[index][
+                                                                      'requiredPoints']
+                                                                  .toString()
+                                                              : filteredDeals[
+                                                                          index]
+                                                                      [
+                                                                      'requiredPoints']
+                                                                  .toString()),
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold)),
                                                   Container(
                                                       child: ElevatedButton(
                                                           child: Text("Redeem"),
@@ -444,7 +586,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                     await preference.remove('email');
                                     Navigator.of(context)
                                         .push(MaterialPageRoute(builder: (_) {
-                                      return (SignupWidget());
+                                      return (LoginWidget());
                                     }));
                                   },
                                   style: ButtonStyle(
