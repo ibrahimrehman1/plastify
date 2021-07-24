@@ -170,14 +170,14 @@ class _DashboardWidgetState extends State<DashboardWidget> {
       handleData();
     } else {
       print("Points not Enough!!");
-      // Fluttertoast.showToast(
-      //     msg: "Points not Enough!!",
-      //     toastLength: Toast.LENGTH_SHORT,
-      //     gravity: ToastGravity.CENTER,
-      //     timeInSecForIosWeb: 1,
-      //     backgroundColor: Colors.red,
-      //     textColor: Colors.white,
-      //     fontSize: 16.0);
+      Fluttertoast.showToast(
+          msg: "Points not Enough!!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
     }
   }
 
@@ -533,23 +533,94 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                           itemCount: previousRedeems.length,
                           itemBuilder: (BuildContext ctxt, int index) {
                             return new Container(
-                                margin: EdgeInsets.all(5.0),
-                                decoration: BoxDecoration(
-                                    border: Border.all(
-                                  color: Colors.black,
-                                  width: 1.0,
-                                )),
+                                margin: EdgeInsets.only(top: 30.0),
                                 child: ListTile(
-                                  title: Text(
-                                    previousRedeems[index]['dealName'],
-                                    style: TextStyle(
-                                        fontSize: 15.0,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  subtitle: Text(previousRedeems[index]
-                                          ['requiredPoints']
-                                      .toString()),
-                                ));
+                                    title: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Stack(children: <Widget>[
+                                            new Image.memory(
+                                                base64.decode(
+                                                    previousRedeems[index]
+                                                        ['image']),
+                                                width: 340,
+                                                height: 180,
+                                                fit: BoxFit.fill),
+                                            Column(children: [
+                                              Container(
+                                                  margin: EdgeInsets.only(
+                                                      top: 20.0),
+                                                  padding: EdgeInsets.all(5.0),
+                                                  width: 100,
+                                                  // height: 20,
+                                                  decoration: BoxDecoration(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              10),
+                                                      color: Color.fromRGBO(
+                                                          255, 40, 77, 1)),
+                                                  child: Text(
+                                                    "${previousRedeems[index]['percentDiscount']}% OFF",
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                        color: Color.fromRGBO(
+                                                            255, 255, 255, 1)),
+                                                  ))
+                                            ]),
+                                          ]),
+                                          Text(
+                                            previousRedeems[index]['dealName'],
+                                            style: TextStyle(
+                                                fontSize: 25.0,
+                                                fontWeight: FontWeight.bold),
+                                          )
+                                        ]),
+                                    subtitle: Container(
+                                        margin: EdgeInsets.only(
+                                            top: 10.0, bottom: 10.0),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(previousRedeems[index]
+                                                ['address']),
+                                            Text(
+                                                "Original Price: " +
+                                                    (previousRedeems[index][
+                                                                'originalPrice']
+                                                            .toString() +
+                                                        " Rs."),
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                            Text(
+                                                "Discounted Price: " +
+                                                    ((previousRedeems[index][
+                                                                'originalPrice'] -
+                                                            (previousRedeems[
+                                                                            index]
+                                                                        [
+                                                                        'percentDiscount'] /
+                                                                    100) *
+                                                                previousRedeems[
+                                                                        index][
+                                                                    'originalPrice'])
+                                                        .toString()) +
+                                                    " Rs.",
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                            Text(
+                                                "Required Points: " +
+                                                    (previousRedeems[index]
+                                                            ['requiredPoints']
+                                                        .toString()),
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                          ],
+                                        ))));
                           },
                         ),
                       ),
@@ -615,6 +686,14 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                               child: ElevatedButton(
                                   child: Text("Logout"),
                                   onPressed: () async {
+                                    Fluttertoast.showToast(
+                                        msg: "Logged Out Successfully!!",
+                                        toastLength: Toast.LENGTH_SHORT,
+                                        gravity: ToastGravity.BOTTOM,
+                                        timeInSecForIosWeb: 1,
+                                        backgroundColor: Colors.red,
+                                        textColor: Colors.white,
+                                        fontSize: 16.0);
                                     final SharedPreferences preference =
                                         await SharedPreferences.getInstance();
                                     await preference.remove('email');

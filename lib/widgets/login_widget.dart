@@ -4,6 +4,7 @@ import "package:flutter_icons/flutter_icons.dart";
 import "./signup_widget.dart";
 import "package:http/http.dart" as http;
 import "dart:convert";
+import "package:fluttertoast/fluttertoast.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "./dashboard_widget.dart";
 import "./manager_dashboard_widget.dart";
@@ -36,6 +37,17 @@ class _LoginWidgetState extends State<LoginWidget> {
 
     Map body = json.decode(result.body);
     print(body);
+    print(body.containsKey("error"));
+    if (body.containsKey("error")) {
+      Fluttertoast.showToast(
+          msg: "Email/Password is Incorrect!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
+    }
 
     final prefs = await SharedPreferences.getInstance();
 
@@ -43,18 +55,29 @@ class _LoginWidgetState extends State<LoginWidget> {
     prefs.setString('idToken', body['idToken']);
     prefs.setString('dataId', body['localId']);
 
-    if (body['email'].toString().contains("manager")) {
-      Navigator.of(ctx).push(MaterialPageRoute(builder: (_) {
-        return (ManagerDashboardWidget());
-      }));
-    } else if (body['email'].toString().contains("admin")) {
-      Navigator.of(ctx).push(MaterialPageRoute(builder: (_) {
-        return (AdminDashboardWidget());
-      }));
-    } else {
-      Navigator.of(ctx).push(MaterialPageRoute(builder: (_) {
-        return (DashboardWidget());
-      }));
+    Fluttertoast.showToast(
+        msg: "Logged In Successfully!!",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0);
+
+    if (body.containsKey("email")) {
+      if (body['email'].toString().contains("manager")) {
+        Navigator.of(ctx).push(MaterialPageRoute(builder: (_) {
+          return (ManagerDashboardWidget());
+        }));
+      } else if (body['email'].toString().contains("admin")) {
+        Navigator.of(ctx).push(MaterialPageRoute(builder: (_) {
+          return (AdminDashboardWidget());
+        }));
+      } else {
+        Navigator.of(ctx).push(MaterialPageRoute(builder: (_) {
+          return (DashboardWidget());
+        }));
+      }
     }
   }
 

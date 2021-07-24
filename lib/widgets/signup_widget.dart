@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import "dart:core";
 import "package:flutter_icons/flutter_icons.dart";
 import "package:http/http.dart" as http;
+import "package:fluttertoast/fluttertoast.dart";
 import "dart:convert";
 import "./login_widget.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -62,6 +63,16 @@ class _SignupWidgetState extends State<SignupWidget> {
           }));
       Map body = json.decode(result.body);
       print(body);
+      if (body.containsKey("error")) {
+        Fluttertoast.showToast(
+            msg: "Email already in use!",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0);
+      }
 
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var email = body['email'],
@@ -90,9 +101,27 @@ class _SignupWidgetState extends State<SignupWidget> {
       prefs.setString('dataId', localId);
       print(body2);
 
+      Fluttertoast.showToast(
+          msg: "Signed Up Successfully!!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
+
       Navigator.of(ctx).push(MaterialPageRoute(builder: (_) {
         return (DashboardWidget());
       }));
+    } else {
+      Fluttertoast.showToast(
+          msg: "Password do not match!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
     }
   }
 

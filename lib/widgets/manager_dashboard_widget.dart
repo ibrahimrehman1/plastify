@@ -4,6 +4,7 @@ import "package:http/http.dart" as http;
 import "dart:convert";
 import "dart:io" as IO;
 import 'package:image_picker/image_picker.dart';
+import "package:fluttertoast/fluttertoast.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class ManagerDashboardWidget extends StatefulWidget {
@@ -98,6 +99,15 @@ class _ManagerDashboardWidgetState extends State<ManagerDashboardWidget> {
 
       var body = json.decode(result2.body);
       print(body);
+
+      Fluttertoast.showToast(
+          msg: "Deal Added Successfully!!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
     });
   }
 
@@ -122,6 +132,15 @@ class _ManagerDashboardWidgetState extends State<ManagerDashboardWidget> {
           "deals": [...allDeals.toList()],
           "managerEmail": preference.getString('email')
         }));
+
+    Fluttertoast.showToast(
+        msg: "Deal Removed Successfully!!",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0);
   }
 
   @override
