@@ -30,6 +30,9 @@ class _SignupWidgetState extends State<SignupWidget> {
 
   String confirmPassword = "";
   num points = 0;
+  // var otp = OTP.FlutterOtp();
+  String enteredOtp = "";
+  bool otpStatus = false;
 
   void initState() {
     getEmail().whenComplete(() async => {print("")});
@@ -50,78 +53,96 @@ class _SignupWidgetState extends State<SignupWidget> {
         : "";
   }
 
+  void showToast(String msg) {
+    Fluttertoast.showToast(
+        msg: msg,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0);
+  }
+
   void createUser(ctx) async {
     var url = Uri.parse(
-        "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyD6FVCXVR7SqRD2rjavBUAantQxi8Qpz-4");
+        "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyDpgSXCIPigSzmvciQnauTbvLfQVOjrH94");
+
+    print(password);
+    print(confirmPassword);
 
     if (password == confirmPassword) {
-      var result = await http.post(url,
-          body: json.encode({
-            "email": emailAddress,
-            "password": password,
-            "returnSecureToken": true
-          }));
-      Map body = json.decode(result.body);
-      print(body);
-      if (body.containsKey("error")) {
-        Fluttertoast.showToast(
-            msg: "Email already in use!",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-            fontSize: 16.0);
+      // otp.sendOtp(mobileNo.toString());
+      if (enteredOtp == "1234") {
+        print("Success");
+        otpStatus = true;
+      } else {
+        print("Failure");
+        otpStatus = false;
       }
 
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var email = body['email'],
-          idToken = body['idToken'],
-          localId = body['localId'];
-      prefs.setString('email', email);
-      prefs.setString('idToken', idToken);
-      prefs.setString('localId', localId);
+      if (otpStatus) {
+        var result = await http.post(url,
+            body: json.encode({
+              "email": emailAddress,
+              "password": password,
+              "returnSecureToken": true
+            }));
+        Map body = json.decode(result.body);
+        print(body);
+        if (body.containsKey("error")) {
+          showToast("Email already in use!");
+        }
 
-      var url2 = Uri.parse(
-          "https://petbottle-project-default-rtdb.firebaseio.com/usersdata/$localId.json");
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        var email = body['email'],
+            idToken = body['idToken'],
+            localId = body['localId'];
+        prefs.setString('email', email);
+        prefs.setString('idToken', idToken);
+        prefs.setString('localId', localId);
 
-      var result2 = await http.patch(url2,
-          headers: {"Content-Type": "application/json"},
-          body: json.encode({
-            "email": emailAddress,
-            "password": password,
-            "idToken": idToken,
-            "firstName": firstName,
-            "lastName": lastName,
-            "mobileNo": mobileNo,
-            "points": points
-          }));
+        var url2 = Uri.parse(
+            "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/usersdata/$localId.json");
 
-      Map body2 = json.decode(result2.body);
-      prefs.setString('dataId', localId);
-      print(body2);
+        var result2 = await http.patch(url2,
+            headers: {"Content-Type": "application/json"},
+            body: json.encode({
+              "email": emailAddress,
+              "password": password,
+              "idToken": idToken,
+              "firstName": firstName,
+              "lastName": lastName,
+              "mobileNo": mobileNo,
+              "points": points
+            }));
 
-      Fluttertoast.showToast(
-          msg: "Signed Up Successfully!!",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0);
+        Map body2 = json.decode(result2.body);
+        prefs.setString('dataId', localId);
+        print(body2);
 
-      Navigator.of(ctx).push(MaterialPageRoute(builder: (_) {
-        return (DashboardWidget());
-      }));
+        showToast("Signed Up Successfully!!");
+
+        Navigator.of(ctx).push(MaterialPageRoute(builder: (_) {
+          return (DashboardWidget());
+        }));
+      } else {
+        showToast("OTP do not match!");
+      }
     } else {
-      Fluttertoast.showToast(
-          msg: "Password do not match!",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0);
+      showToast("Password does not match!");
+    }
+  }
+
+  void sendOTP() async {
+    if (mobileNo.length != 0) {
+      var otpURI = Uri.parse(
+          "https://sendpk.com/api/sms.php?username=923322201477&password=Imoperation021&sender=NCAI%20&mobile=92$mobileNo&message=1234");
+
+      var otp = await http.get(otpURI);
+      print(json.decode(otp.body));
+    } else {
+      showToast("Please Enter Your Mobile Number!");
     }
   }
 
@@ -215,6 +236,28 @@ class _SignupWidgetState extends State<SignupWidget> {
                 },
                 maxLength: 30,
               ),
+              TextField(
+                decoration: InputDecoration(
+                  labelText: "Enter OTP",
+                  prefixIcon: Icon(FlutterIcons.lock_outline_mdi,
+                      color: Color.fromRGBO(0, 200, 0, 1)),
+                ),
+                onChanged: (v) {
+                  enteredOtp = v;
+                },
+                maxLength: 4,
+                keyboardType: TextInputType.number,
+              ),
+              Container(
+                  margin: EdgeInsets.only(top: 30.0),
+                  child: ElevatedButton(
+                      child: Text("Send OTP"),
+                      onPressed: () => sendOTP(),
+                      style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all<Color>(
+                              Colors.lightGreen.shade800),
+                          fixedSize:
+                              MaterialStateProperty.all(Size.fromWidth(320))))),
               Container(
                   margin: EdgeInsets.only(top: 30.0),
                   child: ElevatedButton(

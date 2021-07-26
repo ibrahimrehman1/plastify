@@ -18,7 +18,7 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> {
 
   Future getAllDeals(managerEmail) async {
     var dealUrl = Uri.parse(
-        "https://petbottle-project-default-rtdb.firebaseio.com/managerdeals.json");
+        "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/managerdeals.json");
 
     var allEmailsResult = await http.get(dealUrl);
     Map body = json.decode(allEmailsResult.body);
@@ -36,7 +36,7 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> {
 
   void addManager() async {
     var url = Uri.parse(
-        "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyD6FVCXVR7SqRD2rjavBUAantQxi8Qpz-4");
+        "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyDpgSXCIPigSzmvciQnauTbvLfQVOjrH94");
     var result = await http.post(url,
         body: json.encode({
           "email": managerEmail,

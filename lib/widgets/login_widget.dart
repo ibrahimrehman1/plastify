@@ -9,6 +9,7 @@ import "package:shared_preferences/shared_preferences.dart";
 import "./dashboard_widget.dart";
 import "./manager_dashboard_widget.dart";
 import "./admin_dashboard_widget.dart";
+import "./forgotPassword_widget.dart";
 
 class LoginWidget extends StatefulWidget {
   @override
@@ -24,7 +25,7 @@ class _LoginWidgetState extends State<LoginWidget> {
 
   void loginUser(ctx) async {
     final url = Uri.parse(
-        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyD6FVCXVR7SqRD2rjavBUAantQxi8Qpz-4");
+        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyDpgSXCIPigSzmvciQnauTbvLfQVOjrH94");
 
     emailAddress = emailController.text;
     password = passwordController.text;
@@ -92,7 +93,7 @@ class _LoginWidgetState extends State<LoginWidget> {
         ),
         body: Container(
             width: double.infinity,
-            padding: EdgeInsets.all(16.0),
+            padding: EdgeInsets.only(right: 15.0, left: 15.0, top: 0.0),
             child: SingleChildScrollView(
                 child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -103,7 +104,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                   width: 200,
                   height: 200,
                 ),
-                Container(margin: EdgeInsets.only(top: 20.0)),
+                Container(margin: EdgeInsets.only(top: 10.0)),
                 TextFormField(
                   controller: emailController,
                   decoration: InputDecoration(
@@ -142,6 +143,20 @@ class _LoginWidgetState extends State<LoginWidget> {
                                 Size.fromWidth(320))))),
                 Container(
                     padding: EdgeInsets.only(top: 10.0, bottom: 20.0),
+                    child: Material(
+                        child: InkWell(
+                      child: Text(
+                        "Forgot Password?",
+                        style: TextStyle(decoration: TextDecoration.underline),
+                      ),
+                      onTap: () => Navigator.of(context)
+                          .push(MaterialPageRoute(builder: (_) {
+                        return ForgotPasswordWidget();
+                      })),
+                      hoverColor: Color.fromRGBO(0, 255, 0, 1),
+                    ))),
+                Container(
+                    padding: EdgeInsets.only(bottom: 20.0),
                     child: Material(
                         child: InkWell(
                       child: Text(

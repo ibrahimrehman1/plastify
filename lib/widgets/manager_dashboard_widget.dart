@@ -26,7 +26,7 @@ class _ManagerDashboardWidgetState extends State<ManagerDashboardWidget> {
 
   Future getAllDeals(managerEmail) async {
     var dealUrl = Uri.parse(
-        "https://petbottle-project-default-rtdb.firebaseio.com/managerdeals/$managerEmail.json");
+        "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/managerdeals/$managerEmail.json");
 
     var allEmailsResult = await http.get(dealUrl);
     var body = json.decode(allEmailsResult.body);
@@ -73,7 +73,7 @@ class _ManagerDashboardWidgetState extends State<ManagerDashboardWidget> {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var managerEmail = preference.getString('email')?.split("@")[0];
     var dealUrl = Uri.parse(
-        "https://petbottle-project-default-rtdb.firebaseio.com/managerdeals/$managerEmail.json");
+        "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/managerdeals/$managerEmail.json");
 
     getAllDeals(managerEmail).whenComplete(() async {
       print(allDeals);
@@ -124,7 +124,7 @@ class _ManagerDashboardWidgetState extends State<ManagerDashboardWidget> {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var managerEmail = preference.getString('email')?.split("@")[0];
     var dealUrl = Uri.parse(
-        "https://petbottle-project-default-rtdb.firebaseio.com/managerdeals/$managerEmail.json");
+        "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/managerdeals/$managerEmail.json");
 
     var result2 = await http.patch(dealUrl,
         headers: {"Content-Type": "application/json"},

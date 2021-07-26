@@ -31,7 +31,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
   Future getAllDeals() async {
     var dealUrl = Uri.parse(
-        "https://petbottle-project-default-rtdb.firebaseio.com/managerdeals.json");
+        "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/managerdeals.json");
 
     var allEmailsResult = await http.get(dealUrl);
     Map body = json.decode(allEmailsResult.body);
@@ -62,7 +62,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     var dataId = preference.getString('dataId');
 
     var url2 = Uri.parse(
-        "https://petbottle-project-default-rtdb.firebaseio.com/usersdata/$dataId.json");
+        "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/usersdata/$dataId.json");
 
     var result2 = await http.get(url2);
 
@@ -79,7 +79,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     var dataId = preference.getString('dataId');
     print(dataId);
     var url3 = Uri.parse(
-        "https://petbottle-project-default-rtdb.firebaseio.com/usersdata/$dataId.json");
+        "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/usersdata/$dataId.json");
 
     var result3 = await http.patch(url3,
         headers: {"Content-Type": "application/json"},
@@ -97,7 +97,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   void changeEmail() async {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var urlForEmail = Uri.parse(
-        "https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyD6FVCXVR7SqRD2rjavBUAantQxi8Qpz-4");
+        "https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyDpgSXCIPigSzmvciQnauTbvLfQVOjrH94");
     var result4 = await http.post(urlForEmail,
         body: json.encode({
           "idToken": preference.getString("idToken").toString(),
@@ -113,7 +113,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     var dataId = preference.getString('dataId');
 
     var url2 = Uri.parse(
-        "https://petbottle-project-default-rtdb.firebaseio.com/usersdata/$dataId.json");
+        "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/usersdata/$dataId.json");
 
     var data = await http.get(url2);
     var redeem = json.decode(data.body)['previousRedeems'];
@@ -126,7 +126,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
   void updateRedeem(Map deal) async {
     var urlForRedeem = Uri.parse(
-        "https://petbottle-project-default-rtdb.firebaseio.com/managerdeals/manager.json");
+        "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/managerdeals/manager.json");
     allDeals = allDeals.map((e) {
       if (e['dealName'] == deal['dealName']) {
         e['redeems'] += 1;
@@ -146,7 +146,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     var dataId = preference.getString('dataId');
 
     var url2 = Uri.parse(
-        "https://petbottle-project-default-rtdb.firebaseio.com/usersdata/$dataId.json");
+        "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/usersdata/$dataId.json");
 
     var data = await http.get(url2);
     var decodedRedeem = json.decode(data.body);
@@ -250,7 +250,11 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     print(location);
     var arr = allDeals.where((val) {
       print(val['address']);
-      if (val['address'].toString().toLowerCase().contains(location) == true) {
+      if (val['address']
+              .toString()
+              .toLowerCase()
+              .contains(location.toLowerCase()) ==
+          true) {
         return true;
       }
       return false;
