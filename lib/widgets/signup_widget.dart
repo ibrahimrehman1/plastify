@@ -9,6 +9,7 @@ import "./login_widget.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "./dashboard_widget.dart";
 import "../main.dart";
+import "./otp_widget.dart";
 
 var currentEmail = null;
 
@@ -27,6 +28,10 @@ class _SignupWidgetState extends State<SignupWidget> {
   String emailAddress = "";
 
   String password = "";
+
+  int r = 255;
+  int g = 0;
+  int b = 0;
 
   String confirmPassword = "";
   num points = 0;
@@ -64,85 +69,28 @@ class _SignupWidgetState extends State<SignupWidget> {
         fontSize: 16.0);
   }
 
-  void createUser(ctx) async {
-    var url = Uri.parse(
-        "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyDpgSXCIPigSzmvciQnauTbvLfQVOjrH94");
-
-    print(password);
-    print(confirmPassword);
-
+  void sendOTP() async {
     if (password == confirmPassword) {
-      // otp.sendOtp(mobileNo.toString());
-      if (enteredOtp == "1234") {
-        print("Success");
-        otpStatus = true;
-      } else {
-        print("Failure");
-        otpStatus = false;
-      }
-
-      if (otpStatus) {
-        var result = await http.post(url,
-            body: json.encode({
-              "email": emailAddress,
-              "password": password,
-              "returnSecureToken": true
-            }));
-        Map body = json.decode(result.body);
-        print(body);
-        if (body.containsKey("error")) {
-          showToast("Email already in use!");
-        }
-
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
-        var email = body['email'],
-            idToken = body['idToken'],
-            localId = body['localId'];
-        prefs.setString('email', email);
-        prefs.setString('idToken', idToken);
-        prefs.setString('localId', localId);
-
-        var url2 = Uri.parse(
-            "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/usersdata/$localId.json");
-
-        var result2 = await http.patch(url2,
-            headers: {"Content-Type": "application/json"},
-            body: json.encode({
-              "email": emailAddress,
-              "password": password,
-              "idToken": idToken,
-              "firstName": firstName,
-              "lastName": lastName,
-              "mobileNo": mobileNo,
-              "points": points
-            }));
-
-        Map body2 = json.decode(result2.body);
-        prefs.setString('dataId', localId);
-        print(body2);
-
-        showToast("Signed Up Successfully!!");
-
-        Navigator.of(ctx).push(MaterialPageRoute(builder: (_) {
-          return (DashboardWidget());
+      if (mobileNo.length != 0) {
+        Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+          return otpWidget(
+              emailAddress: emailAddress,
+              password: password,
+              firstName: firstName,
+              lastName: lastName,
+              mobileNo: mobileNo,
+              points: points);
         }));
+        var otpURI = Uri.parse(
+            "https://sendpk.com/api/sms.php?username=923322201477&password=Imoperation021&sender=NCAI%20&mobile=92${int.parse(mobileNo)}&message=1234");
+
+        var otp = await http.get(otpURI);
+        print(json.decode(otp.body));
       } else {
-        showToast("OTP do not match!");
+        showToast("Please Enter Your Mobile Number!");
       }
     } else {
       showToast("Password does not match!");
-    }
-  }
-
-  void sendOTP() async {
-    if (mobileNo.length != 0) {
-      var otpURI = Uri.parse(
-          "https://sendpk.com/api/sms.php?username=923322201477&password=Imoperation021&sender=NCAI%20&mobile=92$mobileNo&message=1234");
-
-      var otp = await http.get(otpURI);
-      print(json.decode(otp.body));
-    } else {
-      showToast("Please Enter Your Mobile Number!");
     }
   }
 
@@ -160,11 +108,6 @@ class _SignupWidgetState extends State<SignupWidget> {
             padding: EdgeInsets.all(16.0),
             child: SingleChildScrollView(
                 child: Column(children: [
-              // Image(
-              //   image: AssetImage('assets/images/petbottle_logo.svg'),
-              //   width: 150,
-              //   height: 150,
-              // ),
               Container(margin: EdgeInsets.only(top: 20.0)),
               TextFormField(
                 decoration: InputDecoration(
@@ -202,7 +145,7 @@ class _SignupWidgetState extends State<SignupWidget> {
               ),
               TextFormField(
                 decoration: InputDecoration(
-                  labelText: "Mobile Number",
+                  labelText: "Mobile Number (0321...)",
                   prefixIcon: Icon(FlutterIcons.device_mobile_oct,
                       color: Color.fromRGBO(0, 200, 0, 1)),
                 ),
@@ -210,7 +153,7 @@ class _SignupWidgetState extends State<SignupWidget> {
                 onChanged: (v) {
                   mobileNo = v;
                 },
-                maxLength: 10,
+                maxLength: 11,
               ),
               TextField(
                 decoration: InputDecoration(
@@ -228,41 +171,52 @@ class _SignupWidgetState extends State<SignupWidget> {
                 decoration: InputDecoration(
                   labelText: "Confirm Password",
                   prefixIcon: Icon(FlutterIcons.lock_outline_mdi,
-                      color: Color.fromRGBO(0, 200, 0, 1)),
+                      color: Color.fromRGBO(r, g, b, 1)),
                 ),
                 obscureText: true,
                 onChanged: (v) {
                   confirmPassword = v;
+                  if (confirmPassword == password) {
+                    setState(() {
+                      r = 0;
+                      g = 200;
+                    });
+                  } else {
+                    setState(() {
+                      r = 255;
+                      g = 0;
+                    });
+                  }
                 },
                 maxLength: 30,
               ),
-              TextField(
-                decoration: InputDecoration(
-                  labelText: "Enter OTP",
-                  prefixIcon: Icon(FlutterIcons.lock_outline_mdi,
-                      color: Color.fromRGBO(0, 200, 0, 1)),
-                ),
-                onChanged: (v) {
-                  enteredOtp = v;
-                },
-                maxLength: 4,
-                keyboardType: TextInputType.number,
-              ),
-              Container(
-                  margin: EdgeInsets.only(top: 30.0),
-                  child: ElevatedButton(
-                      child: Text("Send OTP"),
-                      onPressed: () => sendOTP(),
-                      style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all<Color>(
-                              Colors.lightGreen.shade800),
-                          fixedSize:
-                              MaterialStateProperty.all(Size.fromWidth(320))))),
+              // TextField(
+              //   decoration: InputDecoration(
+              //     labelText: "Enter OTP",
+              //     prefixIcon: Icon(FlutterIcons.lock_outline_mdi,
+              //         color: Color.fromRGBO(0, 200, 0, 1)),
+              //   ),
+              //   onChanged: (v) {
+              //     enteredOtp = v;
+              //   },
+              //   maxLength: 4,
+              //   keyboardType: TextInputType.number,
+              // ),
+              // Container(
+              //     margin: EdgeInsets.only(top: 30.0),
+              //     child: ElevatedButton(
+              //         child: Text("Send OTP"),
+              //         onPressed: () => sendOTP(),
+              //         style: ButtonStyle(
+              //             backgroundColor: MaterialStateProperty.all<Color>(
+              //                 Colors.lightGreen.shade800),
+              //             fixedSize:
+              //                 MaterialStateProperty.all(Size.fromWidth(320))))),
               Container(
                   margin: EdgeInsets.only(top: 30.0),
                   child: ElevatedButton(
                       child: Text("Signup"),
-                      onPressed: () => createUser(context),
+                      onPressed: () => sendOTP(),
                       style: ButtonStyle(
                           backgroundColor: MaterialStateProperty.all<Color>(
                               Colors.lightGreen.shade800),

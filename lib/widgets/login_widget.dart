@@ -66,19 +66,20 @@ class _LoginWidgetState extends State<LoginWidget> {
         fontSize: 16.0);
 
     if (body.containsKey("email")) {
-      if (body['email'].toString().contains("manager")) {
-        Navigator.of(ctx).push(MaterialPageRoute(builder: (_) {
-          return (ManagerDashboardWidget());
-        }));
-      } else if (body['email'].toString().contains("admin")) {
-        Navigator.of(ctx).push(MaterialPageRoute(builder: (_) {
-          return (AdminDashboardWidget());
-        }));
-      } else {
-        Navigator.of(ctx).push(MaterialPageRoute(builder: (_) {
-          return (DashboardWidget());
-        }));
-      }
+      // if (body['email'].toString().contains("manager")) {
+      //   Navigator.of(ctx).push(MaterialPageRoute(builder: (_) {
+      //     return (ManagerDashboardWidget());
+      //   }));
+      // } else if (body['email'].toString().contains("admin")) {
+      //   Navigator.of(ctx).push(MaterialPageRoute(builder: (_) {
+      //     return (AdminDashboardWidget());
+      //   }));
+      // }
+
+      Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+              builder: (BuildContext context) => DashboardWidget()),
+          (Route<dynamic> route) => false);
     }
   }
 
