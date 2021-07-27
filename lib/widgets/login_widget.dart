@@ -1,4 +1,3 @@
-import 'package:app/widgets/admin_dashboard_widget.dart';
 import "package:flutter/material.dart";
 import "package:flutter_icons/flutter_icons.dart";
 import "./signup_widget.dart";
@@ -7,8 +6,7 @@ import "dart:convert";
 import "package:fluttertoast/fluttertoast.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "./dashboard_widget.dart";
-import "./manager_dashboard_widget.dart";
-import "./admin_dashboard_widget.dart";
+
 import "./forgotPassword_widget.dart";
 
 class LoginWidget extends StatefulWidget {

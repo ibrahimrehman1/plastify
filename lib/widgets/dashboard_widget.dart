@@ -21,12 +21,15 @@ class DashboardWidget extends StatefulWidget {
 class _DashboardWidgetState extends State<DashboardWidget> {
   var firstName;
   var lastName;
+  var newPassword;
   var email;
   var mobileNo;
   var location;
   var allDeals = [];
   var previousRedeems = [];
   var filteredDeals = [];
+  bool redeemStatus = false;
+  bool selectRedeem = false;
   bool filterStatus = false;
 
   Future getAllDeals() async {
@@ -67,9 +70,23 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     var result2 = await http.get(url2);
 
     var body = await json.decode(result2.body);
+    if (selectRedeem == true) {
+      getPreviousRedeems();
+
+      Fluttertoast.showToast(
+          msg: "Deal has been Redeemed!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
+    }
     if (body != null) {
       setState(() {
         userData = body;
+        redeemStatus = true;
+        selectRedeem = false;
       });
     }
   }
@@ -87,25 +104,12 @@ class _DashboardWidgetState extends State<DashboardWidget> {
           'email': userData['email'],
           'firstName': userData['firstName'],
           'lastName': userData['lastName'],
-          'mobileNo': userData['mobileNo']
+          'mobileNo': userData['mobileNo'],
+          'password': userData['password']
         }));
     print(json.decode(result3.body));
 
     if (userData['email'] != email) {}
-  }
-
-  void changeEmail() async {
-    final SharedPreferences preference = await SharedPreferences.getInstance();
-    var urlForEmail = Uri.parse(
-        "https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyDpgSXCIPigSzmvciQnauTbvLfQVOjrH94");
-    var result4 = await http.post(urlForEmail,
-        body: json.encode({
-          "idToken": preference.getString("idToken").toString(),
-          "email": email,
-          "returnSecureToken": false
-        }));
-
-    print(json.decode(result4.body));
   }
 
   Future getPreviousRedeems() async {
@@ -125,23 +129,6 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   }
 
   void updateRedeem(Map deal) async {
-    var urlForRedeem = Uri.parse(
-        "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/managerdeals/manager.json");
-    allDeals = allDeals.map((e) {
-      if (e['dealName'] == deal['dealName']) {
-        e['redeems'] += 1;
-        return e;
-      } else {
-        return e;
-      }
-    }).toList();
-
-    var resultForRedeem = await http.patch(urlForRedeem,
-        headers: {"Content-Type": "application/json"},
-        body: json.encode({"deals": allDeals}));
-
-    var body = json.decode(resultForRedeem.body);
-
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var dataId = preference.getString('dataId');
 
@@ -158,6 +145,12 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     var requiredPoints = deal['requiredPoints'];
     var newPoints;
     if (currentPoints >= requiredPoints) {
+      print("Deal Redeemed!");
+      setState(() {
+        redeemStatus = false;
+        selectRedeem = true;
+      });
+
       newPoints = decodedRedeem['points'] - deal['requiredPoints'];
       var result2 = await http.patch(url2,
           headers: {"Content-Type": "application/json"},
@@ -168,6 +161,22 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
       var body2 = await json.decode(result2.body);
       handleData();
+      var urlForRedeem = Uri.parse(
+          "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/managerdeals/manager.json");
+      allDeals = allDeals.map((e) {
+        if (e['dealName'] == deal['dealName']) {
+          e['redeems'] += 1;
+          return e;
+        } else {
+          return e;
+        }
+      }).toList();
+
+      var resultForRedeem = await http.patch(urlForRedeem,
+          headers: {"Content-Type": "application/json"},
+          body: json.encode({"deals": allDeals}));
+
+      var body = json.decode(resultForRedeem.body);
     } else {
       print("Points not Enough!!");
       Fluttertoast.showToast(
@@ -179,6 +188,54 @@ class _DashboardWidgetState extends State<DashboardWidget> {
           textColor: Colors.white,
           fontSize: 16.0);
     }
+  }
+
+  void updatePassword() async {
+    final SharedPreferences preference = await SharedPreferences.getInstance();
+    var changePasswordURI = Uri.parse(
+        "https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyDpgSXCIPigSzmvciQnauTbvLfQVOjrH94");
+
+    var result4 = await http.post(changePasswordURI,
+        body: json.encode({
+          "idToken": preference.getString("idToken").toString(),
+          "password": newPassword,
+          "returnSecureToken": false
+        }));
+
+    print(json.decode(result4.body));
+
+    Fluttertoast.showToast(
+        msg: "Password has been Updated!!",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0);
+  }
+
+  void updateEmail() async {
+    final SharedPreferences preference = await SharedPreferences.getInstance();
+    var changeEmailURI = Uri.parse(
+        "https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyDpgSXCIPigSzmvciQnauTbvLfQVOjrH94");
+
+    var result4 = await http.post(changeEmailURI,
+        body: json.encode({
+          "idToken": preference.getString("idToken").toString(),
+          "email": email,
+          "returnSecureToken": false
+        }));
+
+    print(json.decode(result4.body));
+
+    Fluttertoast.showToast(
+        msg: "Email has been Updated!!",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0);
   }
 
   Future<void> _showMyDialog(String msg) async {
@@ -208,6 +265,8 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                       email = v;
                     } else if (msg == "Mobile No.") {
                       mobileNo = v;
+                    } else if (msg == "Password") {
+                      newPassword = v;
                     }
                   },
                 ),
@@ -227,14 +286,21 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                 setState(() {
                   if (msg == "First Name") {
                     userData['firstName'] = firstName;
+                    updateData();
                   } else if (msg == "Last Name") {
                     userData['lastName'] = lastName;
+                    updateData();
                   } else if (msg == "Email Address") {
-                    changeEmail();
-
                     userData['email'] = email;
+                    updateEmail();
+                    updateData();
                   } else if (msg == "Mobile No.") {
                     userData['mobileNo'] = mobileNo;
+                    updateData();
+                  } else if (msg == "Password") {
+                    userData['password'] = newPassword;
+                    updatePassword();
+                    updateData();
                   }
                 });
                 Navigator.of(context).pop();
@@ -354,8 +420,9 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                         Size.fromWidth(320)))))
                         : Text(""),
                     allDeals.length == 0
-                        ? Container(
-                            margin: EdgeInsets.only(top: 30.0), child: Text(""))
+                        ? Center(
+                            child: CircularProgressIndicator(),
+                          )
                         : Expanded(
                             child: SizedBox(
                               height: 200.0,
@@ -494,25 +561,38 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                                       style: TextStyle(
                                                           fontWeight:
                                                               FontWeight.bold)),
-                                                  Container(
-                                                      child: ElevatedButton(
-                                                          child: Text("Redeem"),
-                                                          onPressed: () {
-                                                            updateRedeem(
-                                                                allDeals[
-                                                                    index]);
-                                                          },
-                                                          style: ButtonStyle(
-                                                              backgroundColor:
-                                                                  MaterialStateProperty.all<
-                                                                          Color>(
-                                                                      Colors
-                                                                          .lightGreen
-                                                                          .shade800),
-                                                              fixedSize: MaterialStateProperty
-                                                                  .all(Size
-                                                                      .fromWidth(
-                                                                          120)))))
+                                                  Row(children: [
+                                                    Container(
+                                                        child: ElevatedButton(
+                                                            child:
+                                                                Text("Redeem"),
+                                                            onPressed: () {
+                                                              updateRedeem(
+                                                                  allDeals[
+                                                                      index]);
+                                                            },
+                                                            style: ButtonStyle(
+                                                                backgroundColor:
+                                                                    MaterialStateProperty.all<
+                                                                            Color>(
+                                                                        Colors
+                                                                            .lightGreen
+                                                                            .shade800),
+                                                                fixedSize: MaterialStateProperty.all(
+                                                                    Size.fromWidth(
+                                                                        120))))),
+                                                    redeemStatus == false &&
+                                                            selectRedeem == true
+                                                        ? Container(
+                                                            margin:
+                                                                EdgeInsets.only(
+                                                                    left: 20.0),
+                                                            child: Center(
+                                                              child:
+                                                                  CircularProgressIndicator(),
+                                                            ))
+                                                        : Text("")
+                                                  ])
                                                 ],
                                               ))));
                                 },
@@ -525,7 +605,8 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                   children: [
                     previousRedeems.length == 0
                         ? Container(
-                            margin: EdgeInsets.only(top: 30.0), child: Text(""))
+                            margin: EdgeInsets.only(top: 20.0),
+                            child: Center(child: CircularProgressIndicator()))
                         : Text("Previous Redeems",
                             style: TextStyle(
                                 fontSize: 30.0, fontWeight: FontWeight.bold)),
@@ -632,7 +713,8 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                   ],
                 ),
                 userData != null
-                    ? Column(
+                    ? SingleChildScrollView(
+                        child: Column(
                         children: [
                           Container(
                               padding: EdgeInsets.all(10.0),
@@ -672,19 +754,15 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                       onPressed: () =>
                                           _showMyDialog('Mobile No.')),
                                   Text(userData['mobileNo']),
+                                  TextButton(
+                                      child: Text("Password",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold)),
+                                      onPressed: () =>
+                                          _showMyDialog('Password')),
+                                  Text(userData['password']),
                                 ],
                               )),
-                          Container(
-                              margin: EdgeInsets.only(top: 30.0),
-                              child: ElevatedButton(
-                                  child: Text("Save Data"),
-                                  onPressed: () => updateData(),
-                                  style: ButtonStyle(
-                                      backgroundColor:
-                                          MaterialStateProperty.all<Color>(
-                                              Colors.lightGreen.shade800),
-                                      fixedSize: MaterialStateProperty.all(
-                                          Size.fromWidth(320))))),
                           Container(
                               margin: EdgeInsets.only(top: 30.0),
                               child: ElevatedButton(
@@ -713,7 +791,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                       fixedSize: MaterialStateProperty.all(
                                           Size.fromWidth(320))))),
                         ],
-                      )
+                      ))
                     : Text(""),
               ],
             ),
