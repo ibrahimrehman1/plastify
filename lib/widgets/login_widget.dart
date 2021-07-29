@@ -1,11 +1,10 @@
 import "package:flutter/material.dart";
 import "package:flutter_icons/flutter_icons.dart";
 import "./signup_widget.dart";
-import "package:http/http.dart" as http;
-import "dart:convert";
 import "package:fluttertoast/fluttertoast.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "./dashboard_widget.dart";
+import "./user_http.dart";
 
 import "./forgotPassword_widget.dart";
 
@@ -21,31 +20,27 @@ class _LoginWidgetState extends State<LoginWidget> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
-  void loginUser(ctx) async {
-    final url = Uri.parse(
-        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyDpgSXCIPigSzmvciQnauTbvLfQVOjrH94");
+  void showToast(String msg) {
+    Fluttertoast.showToast(
+        msg: msg,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0);
+  }
 
+  void loginUser(ctx) async {
     emailAddress = emailController.text;
     password = passwordController.text;
-    var result = await http.post(url,
-        body: json.encode({
-          "email": emailAddress,
-          "password": password,
-          "returnSecureToken": true
-        }));
+    Map body = UserHTTP.loginUser(emailAddress, password);
 
-    Map body = json.decode(result.body);
     print(body);
+
     print(body.containsKey("error"));
     if (body.containsKey("error")) {
-      Fluttertoast.showToast(
-          msg: "Email/Password is Incorrect!",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0);
+      showToast("Email/Password is Incorrect!");
     }
 
     final prefs = await SharedPreferences.getInstance();
@@ -54,14 +49,9 @@ class _LoginWidgetState extends State<LoginWidget> {
     prefs.setString('idToken', body['idToken']);
     prefs.setString('dataId', body['localId']);
 
-    Fluttertoast.showToast(
-        msg: "Logged In Successfully!!",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0);
+    showToast(
+      "Logged In Successfully!!",
+    );
 
     if (body.containsKey("email")) {
       // if (body['email'].toString().contains("manager")) {

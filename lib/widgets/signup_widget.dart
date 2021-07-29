@@ -2,16 +2,15 @@ import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import "dart:core";
 import "package:flutter_icons/flutter_icons.dart";
-import "package:http/http.dart" as http;
 import "package:fluttertoast/fluttertoast.dart";
-import "dart:convert";
 import "./login_widget.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "./dashboard_widget.dart";
 import "../main.dart";
+import "./user_http.dart";
 import "./otp_widget.dart";
 
-var currentEmail = null;
+var currentEmail;
 
 class SignupWidget extends StatefulWidget {
   @override
@@ -35,7 +34,6 @@ class _SignupWidgetState extends State<SignupWidget> {
 
   String confirmPassword = "";
   num points = 0;
-  // var otp = OTP.FlutterOtp();
   String enteredOtp = "";
   bool otpStatus = false;
 
@@ -50,12 +48,11 @@ class _SignupWidgetState extends State<SignupWidget> {
     setState(() {
       currentEmail = obtainedEmail;
     });
-    print(currentEmail);
     currentEmail != null
         ? navigatorKey.currentState?.push(MaterialPageRoute(builder: (_) {
             return (DashboardWidget());
           }))
-        : "";
+        : print("");
   }
 
   void showToast(String msg) {
@@ -81,11 +78,9 @@ class _SignupWidgetState extends State<SignupWidget> {
               mobileNo: mobileNo,
               points: points);
         }));
-        var otpURI = Uri.parse(
-            "https://sendpk.com/api/sms.php?username=923322201477&password=Imoperation021&sender=NCAI%20&mobile=92${int.parse(mobileNo)}&message=1234");
 
-        var otp = await http.get(otpURI);
-        print(json.decode(otp.body));
+        var body = UserHTTP.sendOtp(mobileNo);
+        print(body);
       } else {
         showToast("Please Enter Your Mobile Number!");
       }
@@ -105,10 +100,10 @@ class _SignupWidgetState extends State<SignupWidget> {
         ),
         body: Container(
             width: double.infinity,
-            padding: EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16.0),
             child: SingleChildScrollView(
                 child: Column(children: [
-              Container(margin: EdgeInsets.only(top: 20.0)),
+              Container(margin: const EdgeInsets.only(top: 20.0)),
               TextFormField(
                 decoration: InputDecoration(
                   labelText: "First Name",
@@ -190,28 +185,6 @@ class _SignupWidgetState extends State<SignupWidget> {
                 },
                 maxLength: 30,
               ),
-              // TextField(
-              //   decoration: InputDecoration(
-              //     labelText: "Enter OTP",
-              //     prefixIcon: Icon(FlutterIcons.lock_outline_mdi,
-              //         color: Color.fromRGBO(0, 200, 0, 1)),
-              //   ),
-              //   onChanged: (v) {
-              //     enteredOtp = v;
-              //   },
-              //   maxLength: 4,
-              //   keyboardType: TextInputType.number,
-              // ),
-              // Container(
-              //     margin: EdgeInsets.only(top: 30.0),
-              //     child: ElevatedButton(
-              //         child: Text("Send OTP"),
-              //         onPressed: () => sendOTP(),
-              //         style: ButtonStyle(
-              //             backgroundColor: MaterialStateProperty.all<Color>(
-              //                 Colors.lightGreen.shade800),
-              //             fixedSize:
-              //                 MaterialStateProperty.all(Size.fromWidth(320))))),
               Container(
                   margin: EdgeInsets.only(top: 30.0),
                   child: ElevatedButton(

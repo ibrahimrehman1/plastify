@@ -1,15 +1,11 @@
-// import 'dart:math';
-
 import "package:flutter/material.dart";
-// import "./signup_widget.dart";
 import "./login_widget.dart";
-// import 'dart:io' as IO;
 import "package:flutter_icons/flutter_icons.dart";
 import 'package:fluttertoast/fluttertoast.dart';
 import "dart:convert";
-// import 'dart:typed_data';
 import "package:shared_preferences/shared_preferences.dart";
 import "package:http/http.dart" as http;
+import "./user_http.dart";
 
 var userData;
 
@@ -31,33 +27,28 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   bool redeemStatus = false;
   bool selectRedeem = false;
   bool filterStatus = false;
+  int selectedDeal = -1;
 
   Future getAllDeals() async {
-    var dealUrl = Uri.parse(
-        "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/managerdeals.json");
-
-    var allEmailsResult = await http.get(dealUrl);
-    Map body = json.decode(allEmailsResult.body);
-    if (body.runtimeType != Null) {
-      print("All Deals: " + body.toString());
-      var arr = [];
-      body.forEach((key, value) {
-        if (value['deals'] != null) {
-          List val = value['deals'];
-          arr.addAll(val);
-        }
-      });
-      print("Runtime Type");
-      setState(() {
-        allDeals = arr;
-      });
-    }
+    var arr = UserHTTP.getAllDeals();
+    setState(() {
+      allDeals = arr;
+    });
   }
 
-  List<String> productsSubtitles = ["KFC", "Macdonald", "Starbucks"];
-
   _DashboardWidgetState() {
-    handleData().whenComplete(() => print("abc"));
+    handleData().whenComplete(() => print(""));
+  }
+
+  void showToast(String msg) {
+    Fluttertoast.showToast(
+        msg: msg,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0);
   }
 
   Future handleData() async {
@@ -73,20 +64,14 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     if (selectRedeem == true) {
       getPreviousRedeems();
 
-      Fluttertoast.showToast(
-          msg: "Deal has been Redeemed!",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0);
+      showToast("Deal has been Redeemed!");
     }
     if (body != null) {
       setState(() {
         userData = body;
         redeemStatus = true;
         selectRedeem = false;
+        selectedDeal = -1;
       });
     }
   }
@@ -128,7 +113,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     }
   }
 
-  void updateRedeem(Map deal) async {
+  void updateRedeem(Map deal, int index) async {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var dataId = preference.getString('dataId');
 
@@ -149,6 +134,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
       setState(() {
         redeemStatus = false;
         selectRedeem = true;
+        selectedDeal = index;
       });
 
       newPoints = decodedRedeem['points'] - deal['requiredPoints'];
@@ -179,63 +165,24 @@ class _DashboardWidgetState extends State<DashboardWidget> {
       var body = json.decode(resultForRedeem.body);
     } else {
       print("Points not Enough!!");
-      Fluttertoast.showToast(
-          msg: "Points not Enough!!",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0);
+      showToast("Points not Enough!!");
     }
   }
 
   void updatePassword() async {
     final SharedPreferences preference = await SharedPreferences.getInstance();
-    var changePasswordURI = Uri.parse(
-        "https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyDpgSXCIPigSzmvciQnauTbvLfQVOjrH94");
+    String idToken = preference.getString("idToken").toString();
+    UserHTTP.updatePassword(idToken, newPassword);
 
-    var result4 = await http.post(changePasswordURI,
-        body: json.encode({
-          "idToken": preference.getString("idToken").toString(),
-          "password": newPassword,
-          "returnSecureToken": false
-        }));
-
-    print(json.decode(result4.body));
-
-    Fluttertoast.showToast(
-        msg: "Password has been Updated!!",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0);
+    showToast('Password has been Updated!!');
   }
 
   void updateEmail() async {
     final SharedPreferences preference = await SharedPreferences.getInstance();
-    var changeEmailURI = Uri.parse(
-        "https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyDpgSXCIPigSzmvciQnauTbvLfQVOjrH94");
+    String idToken = preference.getString("idToken").toString();
+    UserHTTP.updateEmail(idToken, email);
 
-    var result4 = await http.post(changeEmailURI,
-        body: json.encode({
-          "idToken": preference.getString("idToken").toString(),
-          "email": email,
-          "returnSecureToken": false
-        }));
-
-    print(json.decode(result4.body));
-
-    Fluttertoast.showToast(
-        msg: "Email has been Updated!!",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0);
+    showToast("Email has been Updated!!");
   }
 
   Future<void> _showMyDialog(String msg) async {
@@ -569,7 +516,8 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                                             onPressed: () {
                                                               updateRedeem(
                                                                   allDeals[
-                                                                      index]);
+                                                                      index],
+                                                                  index);
                                                             },
                                                             style: ButtonStyle(
                                                                 backgroundColor:
@@ -582,7 +530,10 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                                                     Size.fromWidth(
                                                                         120))))),
                                                     redeemStatus == false &&
-                                                            selectRedeem == true
+                                                            selectRedeem ==
+                                                                true &&
+                                                            selectedDeal ==
+                                                                index
                                                         ? Container(
                                                             margin:
                                                                 EdgeInsets.only(
