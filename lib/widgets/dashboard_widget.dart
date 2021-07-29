@@ -4,7 +4,6 @@ import "package:flutter_icons/flutter_icons.dart";
 import 'package:fluttertoast/fluttertoast.dart';
 import "dart:convert";
 import "package:shared_preferences/shared_preferences.dart";
-import "package:http/http.dart" as http;
 import "./user_http.dart";
 
 var userData;
@@ -55,12 +54,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var dataId = preference.getString('dataId');
 
-    var url2 = Uri.parse(
-        "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/usersdata/$dataId.json");
-
-    var result2 = await http.get(url2);
-
-    var body = await json.decode(result2.body);
+    var body = UserHTTP.handleData(dataId);
     if (selectRedeem == true) {
       getPreviousRedeems();
 
@@ -79,33 +73,14 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   Future updateData() async {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var dataId = preference.getString('dataId');
-    print(dataId);
-    var url3 = Uri.parse(
-        "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/usersdata/$dataId.json");
-
-    var result3 = await http.patch(url3,
-        headers: {"Content-Type": "application/json"},
-        body: json.encode({
-          'email': userData['email'],
-          'firstName': userData['firstName'],
-          'lastName': userData['lastName'],
-          'mobileNo': userData['mobileNo'],
-          'password': userData['password']
-        }));
-    print(json.decode(result3.body));
-
-    if (userData['email'] != email) {}
+    UserHTTP.updateData(userData, dataId);
   }
 
   Future getPreviousRedeems() async {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var dataId = preference.getString('dataId');
 
-    var url2 = Uri.parse(
-        "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/usersdata/$dataId.json");
-
-    var data = await http.get(url2);
-    var redeem = json.decode(data.body)['previousRedeems'];
+    var redeem = UserHTTP.getUserData(dataId)['previousRedeems'];
     if (redeem != null) {
       setState(() {
         previousRedeems = redeem;
@@ -116,12 +91,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   void updateRedeem(Map deal, int index) async {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var dataId = preference.getString('dataId');
-
-    var url2 = Uri.parse(
-        "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/usersdata/$dataId.json");
-
-    var data = await http.get(url2);
-    var decodedRedeem = json.decode(data.body);
+    var decodedRedeem = UserHTTP.getUserData(dataId);
     var redeem = [];
     if (decodedRedeem['previousRedeems'] != null) {
       redeem = decodedRedeem['previousRedeems'];
@@ -138,17 +108,9 @@ class _DashboardWidgetState extends State<DashboardWidget> {
       });
 
       newPoints = decodedRedeem['points'] - deal['requiredPoints'];
-      var result2 = await http.patch(url2,
-          headers: {"Content-Type": "application/json"},
-          body: json.encode({
-            "previousRedeems": [...redeem, deal],
-            "points": newPoints
-          }));
-
-      var body2 = await json.decode(result2.body);
+      var body2 = UserHTTP.patchData(dataId, redeem, deal, newPoints);
       handleData();
-      var urlForRedeem = Uri.parse(
-          "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/managerdeals/manager.json");
+
       allDeals = allDeals.map((e) {
         if (e['dealName'] == deal['dealName']) {
           e['redeems'] += 1;
@@ -158,11 +120,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
         }
       }).toList();
 
-      var resultForRedeem = await http.patch(urlForRedeem,
-          headers: {"Content-Type": "application/json"},
-          body: json.encode({"deals": allDeals}));
-
-      var body = json.decode(resultForRedeem.body);
+      var body = UserHTTP.updateManagerDeals(allDeals);
     } else {
       print("Points not Enough!!");
       showToast("Points not Enough!!");

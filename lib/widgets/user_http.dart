@@ -67,4 +67,62 @@ class UserHTTP {
 
     print(json.decode(result.body));
   }
+
+  static handleData(dataId) async {
+    var url2 = Uri.parse(
+        "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/usersdata/$dataId.json");
+
+    var result2 = await http.get(url2);
+
+    var body = await json.decode(result2.body);
+    return body;
+  }
+
+  static updateData(userData, dataId) async {
+    var url3 = Uri.parse(
+        "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/usersdata/$dataId.json");
+
+    var result3 = await http.patch(url3,
+        headers: {"Content-Type": "application/json"},
+        body: json.encode({
+          'email': userData['email'],
+          'firstName': userData['firstName'],
+          'lastName': userData['lastName'],
+          'mobileNo': userData['mobileNo'],
+          'password': userData['password']
+        }));
+    print(json.decode(result3.body));
+  }
+
+  static getUserData(dataId) async {
+    var url2 = Uri.parse(
+        "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/usersdata/$dataId.json");
+
+    var data = await http.get(url2);
+    return json.decode(data.body);
+  }
+
+  static patchData(dataId, redeem, deal, newPoints) async {
+    var url2 = Uri.parse(
+        "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/usersdata/$dataId.json");
+
+    var result2 = await http.patch(url2,
+        headers: {"Content-Type": "application/json"},
+        body: json.encode({
+          "previousRedeems": [...redeem, deal],
+          "points": newPoints
+        }));
+
+    return await json.decode(result2.body);
+  }
+
+  static updateManagerDeals(allDeals) async {
+    var urlForRedeem = Uri.parse(
+        "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/managerdeals/manager.json");
+    var resultForRedeem = await http.patch(urlForRedeem,
+        headers: {"Content-Type": "application/json"},
+        body: json.encode({"deals": allDeals}));
+
+    return json.decode(resultForRedeem.body);
+  }
 }
