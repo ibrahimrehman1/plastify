@@ -34,7 +34,7 @@ class _LoginWidgetState extends State<LoginWidget> {
   void loginUser(ctx) async {
     emailAddress = emailController.text;
     password = passwordController.text;
-    Map body = UserHTTP.loginUser(emailAddress, password);
+    Map body = await UserHTTP.loginUser(emailAddress, password);
 
     print(body);
 

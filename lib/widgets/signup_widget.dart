@@ -79,7 +79,7 @@ class _SignupWidgetState extends State<SignupWidget> {
               points: points);
         }));
 
-        var body = UserHTTP.sendOtp(mobileNo);
+        var body = await UserHTTP.sendOtp(mobileNo);
         print(body);
       } else {
         showToast("Please Enter Your Mobile Number!");

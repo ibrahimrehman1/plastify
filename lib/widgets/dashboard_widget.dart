@@ -29,7 +29,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   int selectedDeal = -1;
 
   Future getAllDeals() async {
-    var arr = UserHTTP.getAllDeals();
+    var arr = await UserHTTP.getAllDeals();
     setState(() {
       allDeals = arr;
     });
@@ -54,7 +54,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var dataId = preference.getString('dataId');
 
-    var body = UserHTTP.handleData(dataId);
+    var body = await UserHTTP.handleData(dataId);
     if (selectRedeem == true) {
       getPreviousRedeems();
 
@@ -73,14 +73,14 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   Future updateData() async {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var dataId = preference.getString('dataId');
-    UserHTTP.updateData(userData, dataId);
+    await UserHTTP.updateData(userData, dataId);
   }
 
   Future getPreviousRedeems() async {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var dataId = preference.getString('dataId');
 
-    var redeem = UserHTTP.getUserData(dataId)['previousRedeems'];
+    var redeem = await UserHTTP.getUserData(dataId)['previousRedeems'];
     if (redeem != null) {
       setState(() {
         previousRedeems = redeem;
@@ -91,7 +91,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   void updateRedeem(Map deal, int index) async {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var dataId = preference.getString('dataId');
-    var decodedRedeem = UserHTTP.getUserData(dataId);
+    var decodedRedeem = await UserHTTP.getUserData(dataId);
     var redeem = [];
     if (decodedRedeem['previousRedeems'] != null) {
       redeem = decodedRedeem['previousRedeems'];
@@ -108,7 +108,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
       });
 
       newPoints = decodedRedeem['points'] - deal['requiredPoints'];
-      var body2 = UserHTTP.patchData(dataId, redeem, deal, newPoints);
+      var body2 = await UserHTTP.patchData(dataId, redeem, deal, newPoints);
       handleData();
 
       allDeals = allDeals.map((e) {
@@ -120,7 +120,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
         }
       }).toList();
 
-      var body = UserHTTP.updateManagerDeals(allDeals);
+      var body = await UserHTTP.updateManagerDeals(allDeals);
     } else {
       print("Points not Enough!!");
       showToast("Points not Enough!!");
@@ -130,7 +130,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   void updatePassword() async {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     String idToken = preference.getString("idToken").toString();
-    UserHTTP.updatePassword(idToken, newPassword);
+    await UserHTTP.updatePassword(idToken, newPassword);
 
     showToast('Password has been Updated!!');
   }
@@ -138,7 +138,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   void updateEmail() async {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     String idToken = preference.getString("idToken").toString();
-    UserHTTP.updateEmail(idToken, email);
+    await UserHTTP.updateEmail(idToken, email);
 
     showToast("Email has been Updated!!");
   }
