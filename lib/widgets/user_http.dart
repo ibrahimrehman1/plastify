@@ -30,7 +30,7 @@ class UserHTTP {
     var allEmailsResult = await http.get(dealUrl);
     Map body = json.decode(allEmailsResult.body);
     if (body.runtimeType != Null) {
-      print("All Deals: " + body.toString());
+      // print("All Deals: " + body.toString());
       var arr = [];
       body.forEach((key, value) {
         if (value['deals'] != null) {
@@ -38,7 +38,6 @@ class UserHTTP {
           arr.addAll(val);
         }
       });
-      print("Runtime Type");
       return arr;
     }
   }
@@ -102,7 +101,7 @@ class UserHTTP {
     return json.decode(data.body);
   }
 
-  static patchData(dataId, redeem, deal, newPoints) async {
+  static patchData(dataId, redeem, deal, newPoints, mobileNo) async {
     var url2 = Uri.parse(
         "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/usersdata/$dataId.json");
 
@@ -110,9 +109,16 @@ class UserHTTP {
         headers: {"Content-Type": "application/json"},
         body: json.encode({
           "previousRedeems": [...redeem, deal],
-          "points": newPoints
         }));
 
+    var url3 = Uri.parse(
+        "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/newuserdata/$mobileNo.json");
+
+    await http.patch(url3,
+        headers: {"Content-Type": "application/json"},
+        body: json.encode({
+          "points": newPoints,
+        }));
     return await json.decode(result2.body);
   }
 
@@ -124,5 +130,16 @@ class UserHTTP {
         body: json.encode({"deals": allDeals}));
 
     return json.decode(resultForRedeem.body);
+  }
+
+  static fetchUserPoints(mobileNo) async {
+    var url = Uri.parse(
+        "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/newuserdata/$mobileNo.json");
+
+    var result = await http.get(url);
+
+    var data = json.decode(result.body);
+
+    return data;
   }
 }

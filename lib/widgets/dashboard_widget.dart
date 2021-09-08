@@ -7,6 +7,7 @@ import "package:shared_preferences/shared_preferences.dart";
 import "./user_http.dart";
 
 var userData;
+var points;
 
 class DashboardWidget extends StatefulWidget {
   @override
@@ -36,7 +37,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   }
 
   _DashboardWidgetState() {
-    handleData().whenComplete(() => print(""));
+    handleData();
   }
 
   void showToast(String msg) {
@@ -60,6 +61,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
       showToast("Deal has been Redeemed!");
     }
+
     if (body != null) {
       setState(() {
         userData = body;
@@ -79,8 +81,11 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   Future getPreviousRedeems() async {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var dataId = preference.getString('dataId');
+    print("Data ID" + dataId.toString());
 
-    var redeem = await UserHTTP.getUserData(dataId)['previousRedeems'];
+    var userData = await UserHTTP.getUserData(dataId);
+    var redeem = userData['previousRedeems'];
+    print(redeem);
     if (redeem != null) {
       setState(() {
         previousRedeems = redeem;
@@ -92,23 +97,25 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var dataId = preference.getString('dataId');
     var decodedRedeem = await UserHTTP.getUserData(dataId);
+    var body2 = await UserHTTP.fetchUserPoints(decodedRedeem['mobileNo']);
+
     var redeem = [];
     if (decodedRedeem['previousRedeems'] != null) {
       redeem = decodedRedeem['previousRedeems'];
     }
-    var currentPoints = decodedRedeem['points'];
+    var currentPoints = body2['points'];
     var requiredPoints = deal['requiredPoints'];
     var newPoints;
     if (currentPoints >= requiredPoints) {
-      print("Deal Redeemed!");
       setState(() {
         redeemStatus = false;
         selectRedeem = true;
         selectedDeal = index;
       });
 
-      newPoints = decodedRedeem['points'] - deal['requiredPoints'];
-      var body2 = await UserHTTP.patchData(dataId, redeem, deal, newPoints);
+      newPoints = currentPoints - deal['requiredPoints'];
+      var body2 = await UserHTTP.patchData(
+          dataId, redeem, deal, newPoints, userData['mobileNo']);
       handleData();
 
       allDeals = allDeals.map((e) {
@@ -122,7 +129,6 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
       var body = await UserHTTP.updateManagerDeals(allDeals);
     } else {
-      print("Points not Enough!!");
       showToast("Points not Enough!!");
     }
   }
@@ -218,9 +224,9 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   }
 
   void filterDeals() {
-    print(location);
+    // print(location);
     var arr = allDeals.where((val) {
-      print(val['address']);
+      // print(val['address']);
       if (val['address']
               .toString()
               .toLowerCase()
@@ -234,21 +240,32 @@ class _DashboardWidgetState extends State<DashboardWidget> {
       filteredDeals = arr;
       filterStatus = true;
     });
-    print(filteredDeals);
+    // print(filteredDeals);
+  }
+
+  void getPoints() async {
+    var body2 = await UserHTTP.fetchUserPoints(userData['mobileNo']);
+    setState(() {
+      points = body2['points'];
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    print("All Deals: $allDeals");
-    print("Previous Redeems: ${previousRedeems}");
+    // print("All Deals: $allDeals");
+    // print("Previous Redeems: ${previousRedeems}");
 // Try reading data from the counter key. If it doesn't exist, return 0.
     if (allDeals.length == 0) {
-      getAllDeals().whenComplete(() => print("Deals Fetched!!!"));
+      getAllDeals().whenComplete(() => print("Deals Fetched!"));
+    }
+
+    if (userData != null && points == null) {
+      getPoints();
     }
 
     if (previousRedeems.length == 0) {
       getPreviousRedeems()
-          .whenComplete(() => print("Previous Redeems Fetched!!!"));
+          .whenComplete(() => print("Previous Redeems Fetched!"));
     }
 
     return Scaffold(
@@ -272,7 +289,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                       onTap: () {},
                       child: userData != null
                           ? Text(
-                              userData['points'].toString() + " Points",
+                              points.toString() + " Points",
                               style: TextStyle(
                                   fontSize: 20.0, fontWeight: FontWeight.bold),
                             )

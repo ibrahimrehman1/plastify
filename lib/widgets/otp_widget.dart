@@ -77,7 +77,7 @@ class _otpWidgetState extends State<otpWidget> {
         var url2 = Uri.parse(
             "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/usersdata/$localId.json");
 
-        var result2 = await http.post(url2,
+        var result2 = await http.patch(url2,
             headers: {"Content-Type": "application/json"},
             body: json.encode({
               "email": widget.emailAddress,
@@ -86,7 +86,6 @@ class _otpWidgetState extends State<otpWidget> {
               "firstName": widget.firstName,
               "lastName": widget.lastName,
               "mobileNo": widget.mobileNo,
-              "points": widget.points
             }));
 
         var url3 = Uri.parse(
