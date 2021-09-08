@@ -62,6 +62,7 @@ class _otpWidgetState extends State<otpWidget> {
           }));
       Map body = json.decode(result.body);
       print(body);
+
       if (body.containsKey("error")) {
         showToast("Email already in use!");
       } else {
@@ -76,7 +77,7 @@ class _otpWidgetState extends State<otpWidget> {
         var url2 = Uri.parse(
             "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/usersdata/$localId.json");
 
-        var result2 = await http.patch(url2,
+        var result2 = await http.post(url2,
             headers: {"Content-Type": "application/json"},
             body: json.encode({
               "email": widget.emailAddress,
@@ -88,9 +89,34 @@ class _otpWidgetState extends State<otpWidget> {
               "points": widget.points
             }));
 
-        Map body2 = json.decode(result2.body);
-        prefs.setString('dataId', localId);
-        print(body2);
+        var url3 = Uri.parse(
+            "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/newuserdata/${widget.mobileNo}.json");
+
+        // var getBody = await http.get(url3);
+
+        // if (json.decode(getBody.body) == null) {
+        //   await http.post(url3,
+        //       headers: {"Content-Type": "application/json"},
+        //       body: json.encode({"points": widget.points}));
+        // } else {
+        //   await http.patch(url3,
+        //       headers: {"Content-Type": "application/json"},
+        //       body: json.encode({"points": widget.points}));
+        // }
+
+        var result3 = await http.patch(url3,
+            headers: {"Content-Type": "application/json"},
+            body: json.encode({"points": widget.points}));
+
+        Map body3 = json.decode(result3.body);
+        print(body3);
+        // var result3 = await http.patch(url3,
+        //     headers: {"Content-Type": "application/json"},
+        //     body: json.encode({"points": widget.points}));
+
+        // Map body2 = json.decode(result3.body);
+        // prefs.setString('dataId', localId);
+        // print(body2);
 
         showToast("Signed Up Successfully!!");
 

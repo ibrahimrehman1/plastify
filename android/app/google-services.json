@@ -1,0 +1,69 @@
+{
+  "project_info": {
+    "project_number": "633593261769",
+    "firebase_url": "https://petbottle-project-ae85a-default-rtdb.firebaseio.com",
+    "project_id": "petbottle-project-ae85a",
+    "storage_bucket": "petbottle-project-ae85a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:633593261769:android:1b3bce41c47cfd5f60a718",
+        "android_client_info": {
+          "package_name": "com.example.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "633593261769-23kb1lj8p25u7sm3583jem48mq35uacs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXB3hNvEjdlefXQYZRSQR9948oe5qzxn0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "633593261769-23kb1lj8p25u7sm3583jem48mq35uacs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:633593261769:android:1b96adb1e2c11b6c60a718",
+        "android_client_info": {
+          "package_name": "com.example.petbottle"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "633593261769-23kb1lj8p25u7sm3583jem48mq35uacs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXB3hNvEjdlefXQYZRSQR9948oe5qzxn0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "633593261769-23kb1lj8p25u7sm3583jem48mq35uacs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
