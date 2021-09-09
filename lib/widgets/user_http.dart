@@ -20,7 +20,7 @@ class UserHTTP {
     Random random = new Random();
     String randomNumber = (random.nextInt(9999) + 1000).toString();
     var otpURI = Uri.parse(
-        "https://sendpk.com/api/sms.php?username=923322201477&password=Imoperation021&sender=NCAI%20&mobile=92${int.parse(mobileNo)}&message=$firstName $lastName, your code is $randomNumber");
+        "https://sendpk.com/api/sms.php?username=923322201477&password=Imoperation021&sender=NCAI,NEDUET%20&mobile=92${int.parse(mobileNo)}&message=$firstName $lastName, your code is $randomNumber");
 
     var otp = await http.get(otpURI);
     return randomNumber;
@@ -96,22 +96,22 @@ class UserHTTP {
     print(json.decode(result3.body));
   }
 
-  static getUserData(dataId) async {
-    var url2 = Uri.parse(
-        "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/usersdata/$dataId.json");
+  // static getUserData(dataId) async {
+  //   var url2 = Uri.parse(
+  //       "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/usersdata/$dataId.json");
 
-    var data = await http.get(url2);
-    return json.decode(data.body);
-  }
+  //   var data = await http.get(url2);
+  //   return json.decode(data.body);
+  // }
 
-  static patchData(dataId, redeem, deal, newPoints, mobileNo) async {
+  static patchData(dataId, currentRedeems, newPoints, mobileNo) async {
     var url2 = Uri.parse(
         "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/usersdata/$dataId.json");
 
     var result2 = await http.patch(url2,
         headers: {"Content-Type": "application/json"},
         body: json.encode({
-          "previousRedeems": [...redeem, deal],
+          "previousRedeems": currentRedeems,
         }));
 
     var url3 = Uri.parse(

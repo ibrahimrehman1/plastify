@@ -24,6 +24,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   var location;
   var allDeals = [];
   var previousRedeems = [];
+  bool previousRedeemsStatus = false;
   var filteredDeals = [];
   bool redeemStatus = false;
   bool selectRedeem = false;
@@ -38,7 +39,8 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   }
 
   _DashboardWidgetState() {
-    handleData();
+    handleData().whenComplete(() => getPoints());
+    getAllDeals().whenComplete(() => print("Deals Fetched!"));
   }
 
   void showToast(String msg) {
@@ -55,18 +57,16 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   Future handleData() async {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var dataId = preference.getString('dataId');
-
-    print(dataId);
     var body = await UserHTTP.handleData(dataId);
-    if (selectRedeem == true) {
-      getPreviousRedeems();
-
-      showToast("Deal has been Redeemed!");
+    if (selectRedeem) {
+      // getPreviousRedeems();
+      // showToast("Deal has been Redeemed!");
     }
 
     if (body != null) {
       setState(() {
         userData = body;
+        previousRedeems = body['previousRedeems'];
         redeemStatus = true;
         selectRedeem = false;
         selectedDeal = -1;
@@ -83,27 +83,28 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   Future getPreviousRedeems() async {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var dataId = preference.getString('dataId');
-    print("Data ID" + dataId.toString());
 
-    var userData = await UserHTTP.getUserData(dataId);
+    var userData = await UserHTTP.handleData(dataId);
     var redeem = userData['previousRedeems'];
-    print(redeem);
     if (redeem != null) {
       setState(() {
         previousRedeems = redeem;
       });
     }
+    setState(() {
+      previousRedeemsStatus = true;
+    });
   }
 
   void updateRedeem(Map deal, int index) async {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var dataId = preference.getString('dataId');
-    var decodedRedeem = await UserHTTP.getUserData(dataId);
+    // var decodedRedeem = await UserHTTP.handleData(dataId);
     // var body2 = await UserHTTP.fetchUserPoints(decodedRedeem['mobileNo']);
 
     var redeem = [];
-    if (decodedRedeem['previousRedeems'] != null) {
-      redeem = decodedRedeem['previousRedeems'];
+    if (userData['previousRedeems'] != null) {
+      redeem = userData['previousRedeems'];
     }
     // var currentPoints = body2['points'];
     var currentPoints = points;
@@ -117,13 +118,19 @@ class _DashboardWidgetState extends State<DashboardWidget> {
       });
 
       newPoints = currentPoints - deal['requiredPoints'];
+      var currentRedeems = [...redeem, deal];
+
       var body2 = await UserHTTP.patchData(
-          dataId, redeem, deal, newPoints, userData['mobileNo']);
-      handleData();
+          dataId, currentRedeems, newPoints, userData['mobileNo']);
+      // handleData();
 
       setState(() {
         points = newPoints;
+        previousRedeems = currentRedeems;
+        redeemStatus = true;
       });
+
+      showToast("Deal has been Redeemed!");
 
       allDeals = allDeals.map((e) {
         if (e['dealName'] == deal['dealName']) {
@@ -231,9 +238,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   }
 
   void filterDeals() {
-    // print(location);
     var arr = allDeals.where((val) {
-      // print(val['address']);
       if (val['address']
               .toString()
               .toLowerCase()
@@ -247,13 +252,10 @@ class _DashboardWidgetState extends State<DashboardWidget> {
       filteredDeals = arr;
       filterStatus = true;
     });
-    // print(filteredDeals);
   }
 
   void getPoints() async {
     var body2 = await UserHTTP.fetchUserPoints(userData['mobileNo']);
-    // print(body2['points']);
-    // print(userData['mobileNo']);
     setState(() {
       points = body2['points'];
     });
@@ -264,18 +266,18 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     // print("All Deals: $allDeals");
     // print("Previous Redeems: ${previousRedeems}");
 // Try reading data from the counter key. If it doesn't exist, return 0.
-    if (allDeals.length == 0) {
-      getAllDeals().whenComplete(() => print("Deals Fetched!"));
-    }
+    // if (allDeals.length == 0) {
+    //   getAllDeals().whenComplete(() => print("Deals Fetched!"));
+    // }
 
-    if (userData != null && points == null) {
-      getPoints();
-    }
+    // if (userData != null && points == null) {
+    //   getPoints();
+    // }
 
-    if (previousRedeems.length == 0) {
-      getPreviousRedeems()
-          .whenComplete(() => print("Previous Redeems Fetched!"));
-    }
+    // if (previousRedeems.length == 0) {
+    //   getPreviousRedeems()
+    //       .whenComplete(() => print("Previous Redeems Fetched!"));
+    // }
 
     return Scaffold(
         body: DefaultTabController(
@@ -539,9 +541,12 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                 Column(
                   children: [
                     previousRedeems.length == 0
-                        ? Container(
-                            margin: EdgeInsets.only(top: 20.0),
-                            child: Center(child: CircularProgressIndicator()))
+                        ? (!previousRedeemsStatus
+                            ? Container(
+                                margin: EdgeInsets.only(top: 20.0),
+                                child:
+                                    Center(child: CircularProgressIndicator()))
+                            : Text("No Previous Redeems!"))
                         : Text("Previous Redeems",
                             style: TextStyle(
                                 fontSize: 30.0, fontWeight: FontWeight.bold)),

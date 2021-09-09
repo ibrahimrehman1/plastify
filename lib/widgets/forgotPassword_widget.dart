@@ -18,28 +18,47 @@ class _ForgotPasswordWidgetState extends State<ForgotPasswordWidget> {
   String password = "";
 
   void updatePassword() async {
-    final SharedPreferences preference = await SharedPreferences.getInstance();
-    var changePasswordURI = Uri.parse(
-        "https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyDpgSXCIPigSzmvciQnauTbvLfQVOjrH94");
+    // final SharedPreferences preference = await SharedPreferences.getInstance();
+    // var changePasswordURI = Uri.parse(
+    //     "https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyDpgSXCIPigSzmvciQnauTbvLfQVOjrH94");
 
-    var result4 = await http.post(changePasswordURI,
-        body: json.encode({
-          "idToken": preference.getString("idToken").toString(),
-          "password": password,
-          "returnSecureToken": false
-        }));
+    // var result4 = await http.post(changePasswordURI,
+    //     body: json.encode({
+    //       "idToken": preference.getString("idToken").toString(),
+    //       "password": password,
+    //       "returnSecureToken": false
+    //     }));
 
-    print(json.decode(result4.body));
+    // print(json.decode(result4.body));
 
-    Fluttertoast.showToast(
-        msg: "Password has been Updated!!",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0);
-    Navigator.of(context).pop();
+    var url = Uri.parse(
+        "https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=AIzaSyDpgSXCIPigSzmvciQnauTbvLfQVOjrH94");
+
+    var val = await http.post(url,
+        headers: {"Content-Type": "application/json"},
+        body: json
+            .encode({"requestType": "PASSWORD_RESET", "email": emailAddress}));
+
+    if (val.statusCode == 200) {
+      Fluttertoast.showToast(
+          msg: "A Password Reset email has been sent to your email address",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
+      Navigator.of(context).pop();
+    } else {
+      Fluttertoast.showToast(
+          msg: "Email Address Not Found",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
+    }
   }
 
   @override
@@ -76,18 +95,6 @@ class _ForgotPasswordWidgetState extends State<ForgotPasswordWidget> {
                     emailAddress = v;
                   },
                   maxLength: 50,
-                ),
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: "New Password",
-                    prefixIcon: Icon(FlutterIcons.lock_outline_mdi,
-                        color: Color.fromRGBO(0, 200, 0, 1)),
-                  ),
-                  obscureText: true,
-                  onChanged: (v) {
-                    password = v;
-                  },
-                  maxLength: 30,
                 ),
                 Container(
                     margin: EdgeInsets.only(top: 30.0),
