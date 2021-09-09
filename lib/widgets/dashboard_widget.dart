@@ -6,9 +6,6 @@ import "dart:convert";
 import "package:shared_preferences/shared_preferences.dart";
 import "./user_http.dart";
 
-var userData;
-var points;
-
 class DashboardWidget extends StatefulWidget {
   @override
   _DashboardWidgetState createState() => _DashboardWidgetState();
@@ -16,9 +13,13 @@ class DashboardWidget extends StatefulWidget {
 
 class _DashboardWidgetState extends State<DashboardWidget> {
   var firstName;
+  var userData;
+
   var lastName;
   var newPassword;
   var email;
+  var points;
+
   var mobileNo;
   var location;
   var allDeals = [];
@@ -55,6 +56,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var dataId = preference.getString('dataId');
 
+    print(dataId);
     var body = await UserHTTP.handleData(dataId);
     if (selectRedeem == true) {
       getPreviousRedeems();
@@ -97,13 +99,14 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var dataId = preference.getString('dataId');
     var decodedRedeem = await UserHTTP.getUserData(dataId);
-    var body2 = await UserHTTP.fetchUserPoints(decodedRedeem['mobileNo']);
+    // var body2 = await UserHTTP.fetchUserPoints(decodedRedeem['mobileNo']);
 
     var redeem = [];
     if (decodedRedeem['previousRedeems'] != null) {
       redeem = decodedRedeem['previousRedeems'];
     }
-    var currentPoints = body2['points'];
+    // var currentPoints = body2['points'];
+    var currentPoints = points;
     var requiredPoints = deal['requiredPoints'];
     var newPoints;
     if (currentPoints >= requiredPoints) {
@@ -117,6 +120,10 @@ class _DashboardWidgetState extends State<DashboardWidget> {
       var body2 = await UserHTTP.patchData(
           dataId, redeem, deal, newPoints, userData['mobileNo']);
       handleData();
+
+      setState(() {
+        points = newPoints;
+      });
 
       allDeals = allDeals.map((e) {
         if (e['dealName'] == deal['dealName']) {
@@ -245,6 +252,8 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
   void getPoints() async {
     var body2 = await UserHTTP.fetchUserPoints(userData['mobileNo']);
+    // print(body2['points']);
+    // print(userData['mobileNo']);
     setState(() {
       points = body2['points'];
     });
@@ -705,6 +714,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                     final SharedPreferences preference =
                                         await SharedPreferences.getInstance();
                                     await preference.remove('email');
+                                    await preference.remove("idToken");
                                     Navigator.of(context)
                                         .push(MaterialPageRoute(builder: (_) {
                                       return (LoginWidget());

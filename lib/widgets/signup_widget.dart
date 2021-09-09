@@ -69,6 +69,7 @@ class _SignupWidgetState extends State<SignupWidget> {
   void sendOTP() async {
     if (password == confirmPassword) {
       if (mobileNo.length != 0) {
+        var code = await UserHTTP.sendOtp(mobileNo, firstName, lastName);
         Navigator.of(context).push(MaterialPageRoute(builder: (_) {
           return otpWidget(
               emailAddress: emailAddress,
@@ -76,11 +77,9 @@ class _SignupWidgetState extends State<SignupWidget> {
               firstName: firstName,
               lastName: lastName,
               mobileNo: mobileNo,
-              points: points);
+              points: points,
+              generatedCode: code);
         }));
-
-        var body = await UserHTTP.sendOtp(mobileNo);
-        print(body);
       } else {
         showToast("Please Enter Your Mobile Number!");
       }

@@ -4,6 +4,7 @@ import "package:fluttertoast/fluttertoast.dart";
 import "dart:convert";
 import "package:http/http.dart" as http;
 import "./dashboard_widget.dart";
+import "dart:math";
 import "package:shared_preferences/shared_preferences.dart";
 
 class otpWidget extends StatefulWidget {
@@ -12,6 +13,7 @@ class otpWidget extends StatefulWidget {
   final String firstName;
   final String lastName;
   final String mobileNo;
+  final String generatedCode;
   final num points;
   const otpWidget(
       {Key? key,
@@ -20,7 +22,8 @@ class otpWidget extends StatefulWidget {
       this.firstName: "",
       this.lastName: "",
       this.mobileNo: "",
-      this.points: 0});
+      this.points: 0,
+      this.generatedCode: ""});
 
   @override
   _otpWidgetState createState() => _otpWidgetState();
@@ -45,7 +48,7 @@ class _otpWidgetState extends State<otpWidget> {
     var url = Uri.parse(
         "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyDpgSXCIPigSzmvciQnauTbvLfQVOjrH94");
 
-    if (enteredOtp == "1234") {
+    if (enteredOtp == widget.generatedCode) {
       print("Success");
       otpStatus = true;
     } else {
@@ -61,7 +64,7 @@ class _otpWidgetState extends State<otpWidget> {
             "returnSecureToken": true
           }));
       Map body = json.decode(result.body);
-      print(body);
+      print(body['idToken']);
 
       if (body.containsKey("error")) {
         showToast("Email already in use!");
@@ -72,7 +75,7 @@ class _otpWidgetState extends State<otpWidget> {
             localId = body['localId'];
         prefs.setString('email', email);
         prefs.setString('idToken', idToken);
-        prefs.setString('localId', localId);
+        prefs.setString('dataId', localId);
 
         var url2 = Uri.parse(
             "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/usersdata/$localId.json");
@@ -91,24 +94,16 @@ class _otpWidgetState extends State<otpWidget> {
         var url3 = Uri.parse(
             "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/newuserdata/${widget.mobileNo}.json");
 
-        // var getBody = await http.get(url3);
+        var getBody = await http.get(url3);
 
-        // if (json.decode(getBody.body) == null) {
-        //   await http.post(url3,
-        //       headers: {"Content-Type": "application/json"},
-        //       body: json.encode({"points": widget.points}));
-        // } else {
-        //   await http.patch(url3,
-        //       headers: {"Content-Type": "application/json"},
-        //       body: json.encode({"points": widget.points}));
-        // }
+        if (json.decode(getBody.body) == null) {
+          var result3 = await http.patch(url3,
+              headers: {"Content-Type": "application/json"},
+              body: json.encode({"points": widget.points}));
+          Map body3 = json.decode(result3.body);
+          print(body3);
+        }
 
-        var result3 = await http.patch(url3,
-            headers: {"Content-Type": "application/json"},
-            body: json.encode({"points": widget.points}));
-
-        Map body3 = json.decode(result3.body);
-        print(body3);
         // var result3 = await http.patch(url3,
         //     headers: {"Content-Type": "application/json"},
         //     body: json.encode({"points": widget.points}));

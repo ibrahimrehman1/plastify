@@ -1,5 +1,6 @@
 import "package:http/http.dart" as http;
 import "dart:convert";
+import "dart:math";
 
 class UserHTTP {
   static loginUser(String emailAddress, String password) async {
@@ -15,12 +16,14 @@ class UserHTTP {
     return json.decode(result.body);
   }
 
-  static sendOtp(mobileNo) async {
+  static sendOtp(mobileNo, firstName, lastName) async {
+    Random random = new Random();
+    String randomNumber = (random.nextInt(9999) + 1000).toString();
     var otpURI = Uri.parse(
-        "https://sendpk.com/api/sms.php?username=923322201477&password=Imoperation021&sender=NCAI%20&mobile=92${int.parse(mobileNo)}&message=1234");
+        "https://sendpk.com/api/sms.php?username=923322201477&password=Imoperation021&sender=NCAI%20&mobile=92${int.parse(mobileNo)}&message=$firstName $lastName, your code is $randomNumber");
 
     var otp = await http.get(otpURI);
-    return json.decode(otp.body);
+    return randomNumber;
   }
 
   static getAllDeals() async {
