@@ -48,6 +48,7 @@ class _LoginWidgetState extends State<LoginWidget> {
     prefs.setString('email', body['email']);
     prefs.setString('idToken', body['idToken']);
     prefs.setString('dataId', body['localId']);
+    prefs.setString('password', password);
 
     showToast(
       "Logged In Successfully!!",

@@ -4,7 +4,7 @@ import "package:fluttertoast/fluttertoast.dart";
 import "dart:convert";
 import "package:http/http.dart" as http;
 import "./dashboard_widget.dart";
-import "dart:math";
+// import "dart:math";
 import "package:shared_preferences/shared_preferences.dart";
 
 class otpWidget extends StatefulWidget {
@@ -76,6 +76,7 @@ class _otpWidgetState extends State<otpWidget> {
         prefs.setString('email', email);
         prefs.setString('idToken', idToken);
         prefs.setString('dataId', localId);
+        prefs.setString('password', widget.password);
 
         var url2 = Uri.parse(
             "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/usersdata/$localId.json");
@@ -84,7 +85,6 @@ class _otpWidgetState extends State<otpWidget> {
             headers: {"Content-Type": "application/json"},
             body: json.encode({
               "email": widget.emailAddress,
-              "password": widget.password,
               "idToken": idToken,
               "firstName": widget.firstName,
               "lastName": widget.lastName,

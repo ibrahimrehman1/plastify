@@ -17,6 +17,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
   var lastName;
   var newPassword;
+  var password;
   var email;
   var points;
 
@@ -57,14 +58,16 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   Future handleData() async {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var dataId = preference.getString('dataId');
+    var getPassword = preference.getString('password');
     var body = await UserHTTP.handleData(dataId);
-    if (selectRedeem) {
-      // getPreviousRedeems();
-      // showToast("Deal has been Redeemed!");
-    }
+    // if (selectRedeem) {
+    // getPreviousRedeems();
+    // showToast("Deal has been Redeemed!");
+    // }
 
     if (body != null) {
       setState(() {
+        password = getPassword;
         userData = body;
         previousRedeems = body['previousRedeems'];
         redeemStatus = true;
@@ -74,10 +77,10 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     }
   }
 
-  Future updateData() async {
+  Future updateData(mobileNoStatus) async {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var dataId = preference.getString('dataId');
-    await UserHTTP.updateData(userData, dataId);
+    await UserHTTP.updateData(userData, dataId, mobileNoStatus, points);
   }
 
   Future getPreviousRedeems() async {
@@ -152,7 +155,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     String idToken = preference.getString("idToken").toString();
     await UserHTTP.updatePassword(idToken, newPassword);
 
-    showToast('Password has been Updated!!');
+    showToast('Password has been Updated!');
   }
 
   void updateEmail() async {
@@ -160,7 +163,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     String idToken = preference.getString("idToken").toString();
     await UserHTTP.updateEmail(idToken, email);
 
-    showToast("Email has been Updated!!");
+    showToast("Email has been Updated!");
   }
 
   Future<void> _showMyDialog(String msg) async {
@@ -211,21 +214,21 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                 setState(() {
                   if (msg == "First Name") {
                     userData['firstName'] = firstName;
-                    updateData();
+                    updateData(false);
                   } else if (msg == "Last Name") {
                     userData['lastName'] = lastName;
-                    updateData();
+                    updateData(false);
                   } else if (msg == "Email Address") {
                     userData['email'] = email;
                     updateEmail();
-                    updateData();
+                    updateData(false);
                   } else if (msg == "Mobile No.") {
                     userData['mobileNo'] = mobileNo;
-                    updateData();
+                    updateData(true);
                   } else if (msg == "Password") {
-                    userData['password'] = newPassword;
+                    password = newPassword;
                     updatePassword();
-                    updateData();
+                    // updateData(false);
                   }
                 });
                 Navigator.of(context).pop();
@@ -657,52 +660,131 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                         child: Column(
                         children: [
                           Container(
-                              padding: EdgeInsets.all(10.0),
-                              decoration: BoxDecoration(
-                                  border: Border.all(
-                                color: Colors.black,
-                                width: 1.0,
-                              )),
                               child: Column(
-                                children: [
-                                  TextButton(
-                                    child: Text("Email Address",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold)),
-                                    onPressed: () =>
-                                        _showMyDialog('Email Address'),
-                                  ),
-                                  Text(userData['email']),
-                                  TextButton(
-                                      child: Text("First Name",
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold)),
-                                      onPressed: () =>
-                                          _showMyDialog('First Name')),
-                                  Text(userData['firstName']),
-                                  TextButton(
-                                      child: Text("Last Name",
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold)),
-                                      onPressed: () =>
-                                          _showMyDialog('Last Name')),
-                                  Text(userData['lastName']),
-                                  TextButton(
-                                      child: Text("Mobile No.",
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold)),
-                                      onPressed: () =>
-                                          _showMyDialog('Mobile No.')),
-                                  Text(userData['mobileNo']),
-                                  TextButton(
-                                      child: Text("Password",
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold)),
-                                      onPressed: () =>
-                                          _showMyDialog('Password')),
-                                  Text(userData['password']),
-                                ],
-                              )),
+                            children: [
+                              // TextButton(
+                              //   child: Text("Email Address",
+                              //       style:
+                              //           TextStyle(fontWeight: FontWeight.bold)),
+                              //   onPressed: () => _showMyDialog('Email Address'),
+                              // ),
+                              // Text(userData['email']),
+                              Text("Edit Profile",
+                                  style: TextStyle(
+                                      fontSize: 30.0,
+                                      fontWeight: FontWeight.bold)),
+                              Container(
+                                  margin: EdgeInsets.only(top: 20.0),
+                                  child: TextFormField(
+                                    readOnly: true,
+
+                                    decoration: InputDecoration(
+                                      labelText: "Email Address",
+                                      prefixIcon: Icon(
+                                          FlutterIcons.email_check_outline_mco,
+                                          color: Color.fromRGBO(0, 200, 0, 1)),
+                                    ),
+                                    keyboardType: TextInputType.emailAddress,
+                                    initialValue: userData['email'],
+                                    onTap: () => _showMyDialog('Email Address'),
+                                    // onChanged: (v) {
+                                    //   emailAddress = v;
+                                    // },
+                                    maxLength: 50,
+                                  )),
+                              // TextButton(
+                              //     child: Text("First Name",
+                              //         style: TextStyle(
+                              //             fontWeight: FontWeight.bold)),
+                              //     onPressed: () => _showMyDialog('First Name')),
+                              // Text(userData['firstName']),
+                              // TextButton(
+                              //     child: Text("Last Name",
+                              //         style: TextStyle(
+                              //             fontWeight: FontWeight.bold)),
+                              //     onPressed: () => _showMyDialog('Last Name')),
+                              // Text(userData['lastName']),
+
+                              TextFormField(
+                                decoration: InputDecoration(
+                                  labelText: "First Name",
+                                  prefixIcon: Icon(
+                                      FlutterIcons.person_outline_mdi,
+                                      color: Color.fromRGBO(0, 200, 0, 1)),
+                                ),
+                                // onChanged: (v) {
+                                //   firstName = v;
+                                // },
+                                onTap: () => _showMyDialog('First Name'),
+                                initialValue: userData['firstName'],
+                                maxLength: 20,
+                                readOnly: true,
+                              ),
+                              TextFormField(
+                                decoration: InputDecoration(
+                                  labelText: "Last Name",
+                                  prefixIcon: Icon(
+                                      FlutterIcons.person_outline_mdi,
+                                      color: Color.fromRGBO(0, 200, 0, 1)),
+                                ),
+                                onTap: () => _showMyDialog('Last Name'),
+                                initialValue: userData['lastName'],
+                                readOnly: true,
+
+                                // onChanged: (v) {
+                                //   lastName = v;
+                                // },
+                                maxLength: 20,
+                              ),
+                              // TextButton(
+                              //     child: Text("Mobile No.",
+                              //         style: TextStyle(
+                              //             fontWeight: FontWeight.bold)),
+                              //     onPressed: () => _showMyDialog('Mobile No.')),
+                              // Text(userData['mobileNo']),
+                              // TextButton(
+                              //     child: Text("Password",
+                              //         style: TextStyle(
+                              //             fontWeight: FontWeight.bold)),
+                              //     onPressed: () => _showMyDialog('Password')),
+                              // Text(userData['password']),
+
+                              TextFormField(
+                                decoration: InputDecoration(
+                                  labelText: "Mobile Number (0321...)",
+                                  prefixIcon: Icon(
+                                      FlutterIcons.device_mobile_oct,
+                                      color: Color.fromRGBO(0, 200, 0, 1)),
+                                ),
+                                keyboardType: TextInputType.number,
+                                onTap: () => _showMyDialog('Mobile No.'),
+                                initialValue: userData['mobileNo'],
+                                readOnly: true,
+
+                                // onChanged: (v) {
+                                //   mobileNo = v;
+                                // },
+                                maxLength: 11,
+                              ),
+                              TextFormField(
+                                onTap: () => _showMyDialog('Password'),
+                                readOnly: true,
+                                decoration: InputDecoration(
+                                  labelText: "Password",
+                                  prefixIcon: Icon(
+                                      FlutterIcons.lock_outline_mdi,
+                                      color: Color.fromRGBO(0, 200, 0, 1)),
+                                ),
+                                // obscureText: true,
+                                initialValue: password,
+                                // onChanged: (v) {
+                                //   password = v;
+                                // },
+
+                                maxLength: 30,
+                              ),
+                            ],
+                          )),
                           Container(
                               margin: EdgeInsets.only(top: 30.0),
                               child: ElevatedButton(

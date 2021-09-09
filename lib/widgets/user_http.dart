@@ -80,7 +80,7 @@ class UserHTTP {
     return body;
   }
 
-  static updateData(userData, dataId) async {
+  static updateData(userData, dataId, mobileNoStatus, points) async {
     var url3 = Uri.parse(
         "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/usersdata/$dataId.json");
 
@@ -91,9 +91,16 @@ class UserHTTP {
           'firstName': userData['firstName'],
           'lastName': userData['lastName'],
           'mobileNo': userData['mobileNo'],
-          'password': userData['password']
         }));
     print(json.decode(result3.body));
+    if (mobileNoStatus) {
+      var url = Uri.parse(
+          "https://petbottle-project-ae85a-default-rtdb.firebaseio.com/newuserdata/${userData['mobileNo']}.json");
+
+      await http.patch(url,
+          headers: {"Content-Type": "application/json"},
+          body: json.encode({"points": points}));
+    }
   }
 
   // static getUserData(dataId) async {
