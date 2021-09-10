@@ -77,10 +77,10 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     }
   }
 
-  Future updateData(mobileNoStatus) async {
+  Future updateData() async {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var dataId = preference.getString('dataId');
-    await UserHTTP.updateData(userData, dataId, mobileNoStatus, points);
+    await UserHTTP.updateData(userData, dataId);
   }
 
   Future getPreviousRedeems() async {
@@ -191,8 +191,6 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                       lastName = v;
                     } else if (msg == "Email Address") {
                       email = v;
-                    } else if (msg == "Mobile No.") {
-                      mobileNo = v;
                     } else if (msg == "Password") {
                       newPassword = v;
                     }
@@ -214,21 +212,17 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                 setState(() {
                   if (msg == "First Name") {
                     userData['firstName'] = firstName;
-                    updateData(false);
+                    updateData();
                   } else if (msg == "Last Name") {
                     userData['lastName'] = lastName;
-                    updateData(false);
+                    updateData();
                   } else if (msg == "Email Address") {
                     userData['email'] = email;
                     updateEmail();
-                    updateData(false);
-                  } else if (msg == "Mobile No.") {
-                    userData['mobileNo'] = mobileNo;
-                    updateData(true);
+                    updateData();
                   } else if (msg == "Password") {
                     password = newPassword;
                     updatePassword();
-                    // updateData(false);
                   }
                 });
                 Navigator.of(context).pop();
@@ -361,7 +355,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                           )
                         : Expanded(
                             child: SizedBox(
-                              height: 200.0,
+                              // height: 200.0,
                               child: new ListView.builder(
                                 scrollDirection: Axis.vertical,
                                 itemCount: filterStatus == false
@@ -555,12 +549,14 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                 fontSize: 30.0, fontWeight: FontWeight.bold)),
                     Expanded(
                       child: SizedBox(
-                        height: 200.0,
+                        // height: 200.0,
+                        width: double.infinity,
                         child: new ListView.builder(
                           scrollDirection: Axis.vertical,
                           itemCount: previousRedeems.length,
                           itemBuilder: (BuildContext ctxt, int index) {
                             return new Container(
+                                width: double.infinity,
                                 margin: EdgeInsets.only(top: 30.0),
                                 child: ListTile(
                                     title: Column(
@@ -749,23 +745,6 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                               //     onPressed: () => _showMyDialog('Password')),
                               // Text(userData['password']),
 
-                              TextFormField(
-                                decoration: InputDecoration(
-                                  labelText: "Mobile Number (0321...)",
-                                  prefixIcon: Icon(
-                                      FlutterIcons.device_mobile_oct,
-                                      color: Color.fromRGBO(0, 200, 0, 1)),
-                                ),
-                                keyboardType: TextInputType.number,
-                                onTap: () => _showMyDialog('Mobile No.'),
-                                initialValue: userData['mobileNo'],
-                                readOnly: true,
-
-                                // onChanged: (v) {
-                                //   mobileNo = v;
-                                // },
-                                maxLength: 11,
-                              ),
                               TextFormField(
                                 onTap: () => _showMyDialog('Password'),
                                 readOnly: true,
