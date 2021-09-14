@@ -19,12 +19,12 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   var newPassword;
   var password;
   var email;
-  var points;
+  var points = 0;
 
   var mobileNo;
   var location;
   var allDeals = [];
-  var previousRedeems = [];
+  var previousRedeems;
   bool previousRedeemsStatus = false;
   var filteredDeals = [];
   bool redeemStatus = false;
@@ -69,6 +69,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
       setState(() {
         password = getPassword;
         userData = body;
+        previousRedeemsStatus = true;
         previousRedeems = body['previousRedeems'];
         redeemStatus = true;
         selectRedeem = false;
@@ -99,7 +100,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     });
   }
 
-  void updateRedeem(Map deal, int index) async {
+  void updateRedeem(Map deal, int index, Map user) async {
     final SharedPreferences preference = await SharedPreferences.getInstance();
     var dataId = preference.getString('dataId');
     // var decodedRedeem = await UserHTTP.handleData(dataId);
@@ -137,7 +138,11 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
       allDeals = allDeals.map((e) {
         if (e['dealName'] == deal['dealName']) {
-          e['redeems'] += 1;
+          if (e['clientsData'] != null) {
+            e['clientsData'] = [...e['clientsData'], user];
+          }else{
+          e['clientsData'] = [user];
+          }
           return e;
         } else {
           return e;
@@ -275,6 +280,12 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     //   getPreviousRedeems()
     //       .whenComplete(() => print("Previous Redeems Fetched!"));
     // }
+
+    if (previousRedeems == null) {
+      setState(() {
+        previousRedeems = [];
+      });
+    }
 
     return Scaffold(
         body: DefaultTabController(
@@ -500,7 +511,8 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                                               updateRedeem(
                                                                   allDeals[
                                                                       index],
-                                                                  index);
+                                                                  index,
+                                                                  userData);
                                                             },
                                                             style: ButtonStyle(
                                                                 backgroundColor:

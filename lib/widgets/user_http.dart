@@ -18,9 +18,9 @@ class UserHTTP {
 
   static sendOtp(mobileNo, firstName, lastName) async {
     Random random = new Random();
-    String randomNumber = (random.nextInt(9999) + 1000).toString();
+    String randomNumber = (random.nextInt(9000) + 1000).toString();
     var otpURI = Uri.parse(
-        "https://sendpk.com/api/sms.php?username=923322201477&password=Imoperation021&sender=NCAI,NEDUET%20&mobile=92${int.parse(mobileNo)}&message=$firstName $lastName, your code is $randomNumber");
+        "https://sendpk.com/api/sms.php?username=923322201477&password=Imoperation021&sender=NCAI%20&mobile=92${int.parse(mobileNo)}&message=$firstName $lastName, your code is $randomNumber");
 
     var otp = await http.get(otpURI);
     return randomNumber;
