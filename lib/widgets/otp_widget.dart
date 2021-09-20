@@ -15,15 +15,16 @@ class otpWidget extends StatefulWidget {
   final String mobileNo;
   final String generatedCode;
   final num points;
-  const otpWidget(
-      {Key? key,
-      this.emailAddress: "",
-      this.password: "",
-      this.firstName: "",
-      this.lastName: "",
-      this.mobileNo: "",
-      this.points: 0,
-      this.generatedCode: ""});
+  const otpWidget({
+    Key? key,
+    this.emailAddress: "",
+    this.password: "",
+    this.firstName: "",
+    this.lastName: "",
+    this.mobileNo: "",
+    this.points: 0,
+    this.generatedCode: "",
+  });
 
   @override
   _otpWidgetState createState() => _otpWidgetState();
@@ -89,6 +90,7 @@ class _otpWidgetState extends State<otpWidget> {
               "firstName": widget.firstName,
               "lastName": widget.lastName,
               "mobileNo": widget.mobileNo,
+              "uid": localId
             }));
 
         var url3 = Uri.parse(

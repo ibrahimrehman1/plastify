@@ -107,8 +107,8 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     // var body2 = await UserHTTP.fetchUserPoints(decodedRedeem['mobileNo']);
 
     var redeem = [];
-    if (userData['previousRedeems'] != null) {
-      redeem = userData['previousRedeems'];
+    if (previousRedeems != null) {
+      redeem = previousRedeems;
     }
     // var currentPoints = body2['points'];
     var currentPoints = points;
@@ -140,14 +140,16 @@ class _DashboardWidgetState extends State<DashboardWidget> {
         if (e['dealName'] == deal['dealName']) {
           if (e['clientsData'] != null) {
             e['clientsData'] = [...e['clientsData'], user];
-          }else{
-          e['clientsData'] = [user];
+          } else {
+            e['clientsData'] = [user];
           }
           return e;
         } else {
           return e;
         }
       }).toList();
+
+      print(allDeals);
 
       var body = await UserHTTP.updateManagerDeals(allDeals);
     } else {

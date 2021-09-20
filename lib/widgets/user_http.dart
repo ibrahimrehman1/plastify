@@ -20,9 +20,11 @@ class UserHTTP {
     Random random = new Random();
     String randomNumber = (random.nextInt(9000) + 1000).toString();
     var otpURI = Uri.parse(
-        "https://sendpk.com/api/sms.php?username=923322201477&password=Imoperation021&sender=NCAI%20&mobile=92${int.parse(mobileNo)}&message=$firstName $lastName, your code is $randomNumber");
+        "https://sendpk.com/api/sms.php?username=923322201477&password=Imoperation021&sender=NCAI%20&mobile=92${int.parse(mobileNo)}&message=your code is $randomNumber");
 
     var otp = await http.get(otpURI);
+    // var data = await json.decode(otp.body);
+    print(otp.body);
     return randomNumber;
   }
 
